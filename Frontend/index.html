@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Story Spark Drawing Pad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        canvas {
+            border: 2px solid #ccc;
+            background-color: #fff;
+            cursor: crosshair;
+        }
+
+        .color-btn.selected {
+            outline: 3px solid black;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center min-h-screen p-6 bg-cover bg-center"
+      style="background-image: url('images/c0d5f41f-cf89-4a0f-9fc3-066b2de8b3a1.jpg');">
+
+
+
+
+    <!-- 🎨 Toolbar -->
+    <div
+        class="flex flex-wrap items-center justify-center gap-8 mb-4 bg-purple-400 p-4 shadow-md w-full max-w-full">
+        <!-- 🎨 Preset Colors -->
+        <div class="flex gap-2.5 mb-2">
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #FF0000;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #00FF00;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #0000FF;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #FFFF00;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #FFA500;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #800080;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #000000;"></button>
+            <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #FFFFFF;"></button>
+        </div>
+        <div>
+            <input type="color" id="colorPicker" class="w-10 h-10 border rounded">
+        </div>  
+
+        <div>
+            <label class="font-medium mr-2">Brush Size:</label>
+            <input type="range" id="brushSize" min="1" max="20" value="5" class="max-w-32">
+        </div>
+        <button id="eraserBtn" class="px-4 py-2 bg-purple-950 text-white rounded-lg hover:bg-purple-800">Eraser</button>
+        <button id="clearBtn" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Clear</button>
+    </div>
+
+    <!-- 🌟 Creative Heading -->
+    <h2 class="text-2xl font-bold text-center mb-4 text-purple-800">
+        🎨 What’s in your mind today? Let your imagination fly! 🖌️
+    </h2>
+
+
+    <!-- 🖌️ Main Area -->
+    <div class="flex gap-4 w-full max-w-full">
+        <!-- Shapes Panel (optional) -->
+        <div class="flex flex-col gap-4 bg-purple-400 p-4 rounded-2xl shadow-md w-28 items-center">
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="pen">✏️</button>
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="circle">⚪</button>
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="rectangle">⬛</button>
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="line">➖</button>
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="triangle">🔺</button>
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="star">⭐</button>
+            <button class="shape-btn px-3 py-2 bg-blue-100 rounded hover:bg-blue-400" data-shape="ellipse">⬭</button>
+        </div>
+        <div>
+            <!-- Drawing Canvas -->
+            <canvas id="drawingCanvas" width="1350" height="500" class="border-double border-purple-900 rounded-2xl shadow-md"></canvas>
+        </div>
+    </div>
+
+    <!-- 💾 Save Button -->
+    <button id="saveBtn" class="mt-6 px-6 py-3 bg-purple-950 text-white rounded-xl shadow hover:bg-purple-800">
+        💾 Save Drawing
+    </button>
+
+    <!-- ⚙️ External JS -->
+    <script src="script.js"></script>
+</body>
+
+</html>
