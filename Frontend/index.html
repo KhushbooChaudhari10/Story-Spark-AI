@@ -6,6 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Story Spark Drawing Pad</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+    <script>
+        const formData = new FormData();
+        formData.append("drawing", fileInput.files[0]);
+
+        try {
+            const res = await fetch("http://localhost:5000/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+            console.log("✅ Uploaded successfully:", data);
+        } catch (err) {
+            console.error("⚠️ Error uploading image:", err);
+        }
+
+        // Your Firebase config from the Firebase console
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGANW9fpWq1UrHrTj3ZHb2CTCAzhw41zg",
+            authDomain: "storyspark-ai-914b9.firebaseapp.com",
+            projectId: "storyspark-ai-914b9",
+            storageBucket: "storyspark-ai-914b9.appspot.com",
+            messagingSenderId: "951600914209",
+            appId: "1:951600914209:web:827ba5e63fc7648d55a860",
+            measurementId: "G-M8Y97ZHQJ5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
+    </script>
+
+
+
     <style>
         canvas {
             border: 2px solid #ccc;
@@ -20,14 +55,13 @@
 </head>
 
 <body class="flex flex-col items-center min-h-screen p-6 bg-cover bg-center"
-      style="background-image: url('images/c0d5f41f-cf89-4a0f-9fc3-066b2de8b3a1.jpg');">
+    style="background-image: url('images/c0d5f41f-cf89-4a0f-9fc3-066b2de8b3a1.jpg');">
 
 
 
 
     <!-- 🎨 Toolbar -->
-    <div
-        class="flex flex-wrap items-center justify-center gap-8 mb-4 bg-purple-400 p-4 shadow-md w-full max-w-full">
+    <div class="flex flex-wrap items-center justify-center gap-8 mb-4 bg-purple-400 p-4 shadow-md w-full max-w-full">
         <!-- 🎨 Preset Colors -->
         <div class="flex gap-2.5 mb-2">
             <button class="color-btn w-8 h-8 rounded-full border" style="background-color: #FF0000;"></button>
@@ -41,7 +75,7 @@
         </div>
         <div>
             <input type="color" id="colorPicker" class="w-10 h-10 border rounded">
-        </div>  
+        </div>
 
         <div>
             <label class="font-medium mr-2">Brush Size:</label>
@@ -71,7 +105,8 @@
         </div>
         <div>
             <!-- Drawing Canvas -->
-            <canvas id="drawingCanvas" width="1350" height="500" class="border-double border-purple-900 rounded-2xl shadow-md"></canvas>
+            <canvas id="drawingCanvas" width="1350" height="500"
+                class="border-double border-purple-900 rounded-2xl shadow-md"></canvas>
         </div>
     </div>
 
@@ -80,7 +115,6 @@
         💾 Save Drawing
     </button>
 
-    <!-- ⚙️ External JS -->
     <script src="script.js"></script>
 </body>
 
