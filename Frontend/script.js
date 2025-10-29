@@ -1,5 +1,7 @@
+
 const canvas = document.getElementById("drawingCanvas");
 const ctx = canvas.getContext("2d");
+
 
 const colorPicker = document.getElementById("colorPicker");
 const brushSize = document.getElementById("brushSize");
@@ -162,11 +164,38 @@ clearBtn.addEventListener("click", () => ctx.clearRect(0, 0, canvas.width, canva
 
 // 💾 Save as PNG
 saveBtn.addEventListener("click", () => {
-    const link = document.createElement("a");
-    link.download = "my_drawing.png";
-    link.href = canvas.toDataURL();
-    link.click();
+  canvas.toBlob(async (blob) => {
+    if (!blob) {
+      alert("❌ Canvas is empty!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("drawing", blob, `drawing_${Date.now()}.png`);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.imageUrl) {
+        alert("🎉 Drawing uploaded successfully!");
+        console.log("✅ Cloudinary URL:", data.imageUrl);
+      } else {
+        alert("❌ Upload failed.");
+      }
+    } catch (err) {
+      console.error("Error uploading:", err);
+      alert("⚠️ Error uploading image.");
+    }
+  }, "image/png");
 });
+
+
+
+
 
 // // 🎨 Preset Colors
 // colorButtons.forEach(btn => {
