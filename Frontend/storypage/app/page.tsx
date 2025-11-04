@@ -1,16 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
 import Image from "next/image";
 import { Nunito } from "next/font/google";
-=======
->>>>>>> 0301f8c5a6f0d363810d59767325b43dbc9658ad
 
 export default function HomePage() {
   const router = useRouter();
 
   return (
-<<<<<<< HEAD
     // 🧭 The main layout container — keeps everything centered both vertically and horizontally
     // Using flex ensures the hero content always stays in the middle regardless of screen size.
     <div className="relative min-h-screen flex items-center justify-center p-4">
@@ -83,41 +79,10 @@ export default function HomePage() {
           onClick={() => router.push("/child-login")}
           // Using consistent max-width ties the visual hierarchy with the centered text block.
           className="bg-purple-500 text-white px-10 py-4 rounded-lg hover:bg-purple-600 transition text-xl font-semibold shadow-lg max-w-sm w-full"
-=======
-    <div className="flex flex-col items-center justify-center min-h-screen bg-purple-100">
-      <h1 className="text-4xl font-bold text-purple-800 mb-8">
-        🎨 Story Spark AI
-      </h1>
-      <p className="text-gray-700 mb-10 text-center max-w-md">
-        Welcome! Please login or sign up to start creating stories with your imagination.
-      </p>
-
-      <div className="flex gap-6">
-        <button
-          onClick={() => router.push("/login")}
-          className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-purple-800 transition"
-        >
-          Login
-        </button>
-
-        <button
-          onClick={() => router.push("/signup")}
-          className="bg-white border-2 border-purple-700 text-purple-700 px-6 py-3 rounded-lg hover:bg-purple-100 transition"
-        >
-          Sign Up
-        </button>
-        <button
-          onClick={() => router.push("/child-login")}
-          className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition"
->>>>>>> 0301f8c5a6f0d363810d59767325b43dbc9658ad
         >
           Child Login
         </button>
       </div>
-<<<<<<< HEAD
-
-=======
->>>>>>> 0301f8c5a6f0d363810d59767325b43dbc9658ad
     </div>
   );
 }
