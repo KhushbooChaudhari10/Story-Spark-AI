@@ -5,20 +5,19 @@ const { uploadDrawing, getChildDrawings, getDrawingsByChildId } = require("../co
 
 const router = express.Router();
 
-// Use memory storage for file
+// using memory storage keeps file handling faster for small child drawings
+// no temporary disk write → cleaner + reduces filesystem overhead
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// ✅ POST /api/upload
+// children drawings are uploaded frequently, so handling this endpoint lightweight + fast is important
 router.post("/", upload.single("drawing"), uploadDrawing);
 
-// 👩 Parent: get all child drawings
+// this endpoint gives parents visibility over all children they manage
+// parent UI needs aggregated view to monitor each child's progress/creativity
 router.get("/children/:parentId", getChildDrawings);
 
-// ✅ Get all drawings for a specific child
-//router.get("/child/:childId", verifyToken, getChildDrawings);
-
+// child dashboard needs this specific endpoint so each child only sees their own gallery
 router.get("/child/:childId", getDrawingsByChildId);
-
 
 module.exports = router;

@@ -13,19 +13,21 @@ const {
   getOwnProfile
 } = require('../controllers/userController');
 
+// child login is public because kids authenticate only by name
+// identity link happens server-side after this call
 router.post('/children/login', childLogin);
 
-// All routes require authentication
+// protect all routes going forward so only Firebase-authenticated sessions can continue
 router.use(verifyFirebaseToken);
 
-// 👩‍👧 Parent routes
+// parent can manage multiple children — secure role check ensures only parent accounts can perform CRUD actions
 router.get('/children', checkRole(['parent']), getChildren);
 router.post('/children', checkRole(['parent']), createChild);
 router.put('/children/:id', checkRole(['parent']), updateChild);
 router.delete('/children/:id', checkRole(['parent']), deleteChild);
 
-
-// 🧒 Child route
+// child dashboard needs to fetch its own profile only
+// strict kid role check prevents a child from querying other child accounts
 router.get('/me', checkRole(['kid']), getOwnProfile);
 
 module.exports = router;
