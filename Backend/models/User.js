@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String }, // only required for parent
+  email: { type: String, unique: true, sparse: true }, // only required for parent
   password: { type: String, required: false },
   firebaseUid: { type: String },
   role: { type: String, enum: ['parent', 'kid'], required: true },
