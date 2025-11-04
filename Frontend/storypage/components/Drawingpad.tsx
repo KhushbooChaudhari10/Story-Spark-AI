@@ -19,7 +19,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [mounted, setMounted] = useState(false);
 
-  // 🎨 Preset colors
+  // giving quick fixed selection makes UI faster for kids — avoids manual color picking every time
   const presetColors = [
     "#FF0000",
     "#00FF00",
@@ -31,7 +31,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
     "#FFFFFF",
   ];
 
-  // ✅ Track login state
+  // syncs firebase auth state into this component — needed so uploads associate with correct child/parent session
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -39,37 +39,37 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
     return () => unsubscribe();
   }, []);
 
-  // ✅ Ensure hydration-safe mount
+  // ensures canvas related DOM refs exist before drawing logic attaches listeners
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // protecting route — child should only reach here after logging in
   useEffect(() => {
-  const childName = localStorage.getItem("childName");
-  if (!childName) {
-    alert("Please log in as a child first!");
-    window.location.href = "/child-login";
-  }
-}, []);
+    const childName = localStorage.getItem("childName");
+    if (!childName) {
+      alert("Please log in as a child first!");
+      window.location.href = "/child-login";
+    }
+  }, []);
 
-
-  // ✅ Drawing logic
+  // core drawing system — uses DOM canvas API directly instead of React state to avoid expensive re-renders
   useEffect(() => {
     if (!mounted) return;
 
     const canvas = canvasRef.current;
     const colorPicker = colorPickerRef.current;
     const brushSize = brushSizeRef.current;
-
     if (!canvas || !colorPicker || !brushSize) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // flag used so mousemove only draws after mousedown — this prevents accidental continuous strokes
     let drawing = false;
 
     const startDrawing = (e: MouseEvent) => {
-      if (shapeMode !== "pen") return;
+      if (shapeMode !== "pen") return; // prevents pen logic interfering with shape placement
       drawing = true;
       ctx.beginPath();
       ctx.moveTo(e.offsetX, e.offsetY);
@@ -93,6 +93,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
       ctx.moveTo(e.offsetX, e.offsetY);
     };
 
+    // shape clicks create simpler “stamp based” drawing — easier for young kids to use
     const handleClick = (e: MouseEvent) => {
       if (shapeMode === "pen") return;
 
@@ -144,6 +145,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
       outerRadius: number,
       innerRadius: number
     ) => {
+      // this function remains math-heavy — kept isolated so main drawing logic stays readable
       let rot = (Math.PI / 2) * 3;
       let x = cx;
       let y = cy;
@@ -166,6 +168,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
       ctx.fill();
     };
 
+    // attach raw canvas listeners — these allow real-time drawing without React rerender cost
     canvas.addEventListener("mousedown", startDrawing);
     canvas.addEventListener("mouseup", stopDrawing);
     canvas.addEventListener("mouseout", stopDrawing);
@@ -181,7 +184,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
     };
   }, [mounted, erasing, shapeMode]);
 
-  // 🧹 Clear Canvas
+  // instantly clears canvas state — used as quick reset during creativity exploration
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -190,49 +193,47 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  // 💾 Save Canvas to Backend
-  // 💾 Save Canvas to Backend
-const saveDrawing = async () => {
-  const childId = localStorage.getItem("childId"); // ✅ stored at child login
-  if (!childId) {
-    alert("Please log in as a child first!");
-    window.location.href = "/child-login";
-    return;
-  }
-
-  const canvas = canvasRef.current;
-  if (!canvas) return;
-
-  canvas.toBlob(async (blob) => {
-    if (!blob) return alert("Canvas is empty!");
-
-    const formData = new FormData();
-    formData.append("drawing", blob, `drawing_${Date.now()}.png`);
-    formData.append("childId", childId);
-
-    try {
-      const res = await fetch("http://localhost:5000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("🎉 Drawing uploaded successfully!");
-        onComplete();
-      } else {
-        alert("❌ Upload failed: " + data.message);
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-      alert("⚠️ Upload error. Please try again later.");
+  // upload the drawing to backend and notify parent when complete — onComplete triggers next screen
+  const saveDrawing = async () => {
+    const childId = localStorage.getItem("childId");
+    if (!childId) {
+      alert("Please log in as a child first!");
+      window.location.href = "/child-login";
+      return;
     }
-  });
-};
 
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return alert("Canvas is empty!");
+
+      const formData = new FormData();
+      formData.append("drawing", blob, `drawing_${Date.now()}.png`);
+      formData.append("childId", childId);
+
+      try {
+        const res = await fetch("http://localhost:5000/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert("🎉 Drawing uploaded successfully!");
+          onComplete();
+        } else {
+          alert("❌ Upload failed: " + data.message);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        alert("⚠️ Upload error. Please try again later.");
+      }
+    });
+  };
 
   if (!mounted) return null;
-
+  
   return (
     <div
       className="flex flex-col items-center min-h-screen bg-cover bg-center p-6"

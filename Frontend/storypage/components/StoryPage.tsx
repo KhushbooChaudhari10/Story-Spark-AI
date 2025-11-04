@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import storyData from "@/data/story.json";
 
-// 🧱 Define TypeScript types for better safety
+// Type safety ensures future JSON updates fail fast if schema changes
 type Illustration = {
   action: "paint_character" | "paint_background";
   character?: string;
@@ -23,40 +23,44 @@ const StoryPage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    
+    // drawing depends entirely on DOM canvas API, so effect runs only once after mount
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // story JSON acts as a mini “scene graph”
+    // changing it updates illustration without needing code rewrite
     const story: Story = storyData as Story;
 
-    
-    // Clear canvas
+    // always reset canvas before rendering — avoids visual stacking if page reloads in SPA
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw elements from JSON
+    // illustration instructions are declarative, not imperative
+    // each item in JSON controls the render output in a structured way
     story.illustrations.forEach((item) => {
       if (item.action === "paint_background") {
-        // 🌳 Draw sky
-        ctx.fillStyle = "#9be7ff"; // light blue
+        // background is drawn first — sets context so characters look grounded in a world
+
+        // sky layer
+        ctx.fillStyle = "#9be7ff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 🌿 Draw ground
+        // ground layer
         ctx.fillStyle = "lightgreen";
         ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
 
-        // 🌲 Draw multiple trees
+        // repeating shapes gives environment richness without manual placement per element
         for (let i = 0; i < 5; i++) {
           const treeX = 100 + i * 150;
           const treeY = canvas.height - 150;
 
-          // tree trunk
-          ctx.fillStyle = "#8B4513"; // brown
+          // trunk
+          ctx.fillStyle = "#8B4513";
           ctx.fillRect(treeX, treeY - 60, 20, 60);
 
-          // leaves (triangle)
+          // foliage
           ctx.fillStyle = "green";
           ctx.beginPath();
           ctx.moveTo(treeX - 30, treeY - 60);
@@ -66,7 +70,7 @@ const StoryPage: React.FC = () => {
           ctx.fill();
         }
 
-        // 🐦 Draw some birds (simple "V" shapes)
+        // small irregular bird placement keeps scenery playful instead of overly “grid-like”
         ctx.strokeStyle = "black";
         ctx.lineWidth = 2;
         for (let i = 0; i < 4; i++) {
@@ -80,39 +84,41 @@ const StoryPage: React.FC = () => {
         }
       }
 
-
       if (item.action === "paint_character" && item.character === "fox") {
+        // fox character uses relative geometry rather than static sprites
+        // this makes it easier later to animate / reposition via JSON
+
         const x = item.x || 250;
         const groundY = canvas.height - 120;
         const y = groundY;
 
-        // 🦊 Body
+        // body
         ctx.fillStyle = "#F97316";
         ctx.beginPath();
         ctx.ellipse(x, y - 25, 45, 20, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Head origin (top-left of body + small offset)
+        // head placement computed relative to body rather than fixed coordinates
         const headX = x + 25;
         const headY = y - 25;
 
-        // 🦊 Head
+        // head shape
         ctx.fillStyle = "#F97316";
         ctx.beginPath();
-        ctx.moveTo(headX, headY); // start at body-neck
-        ctx.lineTo(headX + 30, headY - 15); // top
-        ctx.quadraticCurveTo(headX + 45, headY, headX + 30, headY + 15); // muzzle curve
+        ctx.moveTo(headX, headY);
+        ctx.lineTo(headX + 30, headY - 15);
+        ctx.quadraticCurveTo(headX + 45, headY, headX + 30, headY + 15);
         ctx.closePath();
         ctx.fill();
 
-        // 🦊 White muzzle (relative to head)
+        // muzzle patch
         ctx.fillStyle = "white";
         ctx.beginPath();
         ctx.moveTo(headX + 25, headY + 5);
         ctx.quadraticCurveTo(headX + 35, headY - 5, headX + 28, headY + 10);
         ctx.fill();
 
-        // 🦊 Ears (relative to head)
+        // ears placed relative to head to maintain scaling consistency if character size changes later
         ctx.fillStyle = "#F97316";
         ctx.beginPath();
         ctx.moveTo(headX + 5, headY - 10);
@@ -128,19 +134,17 @@ const StoryPage: React.FC = () => {
         ctx.closePath();
         ctx.fill();
 
-        // 🦊 Eyes (relative to head)
+        // eyes + nose
         ctx.fillStyle = "black";
         ctx.beginPath();
         ctx.arc(headX + 18, headY - 5, 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // 🦊 Nose (relative to head)
         ctx.beginPath();
         ctx.arc(headX + 30, headY + 8, 3, 0, Math.PI * 2);
         ctx.fill();
 
-
-        // 🦊 Tail (curvy, bushy, white tip)
+        // tail uses curve shapes for a more organic, cartoon feel
         ctx.fillStyle = "#F97316";
         ctx.beginPath();
         ctx.moveTo(x - 35, y - 20);
@@ -156,26 +160,26 @@ const StoryPage: React.FC = () => {
         ctx.quadraticCurveTo(x - 55, y - 30, x - 50, y - 20);
         ctx.fill();
 
-        // 🐾 Legs (thin and slightly bent)
+        // legs left minimal to keep visual style simple + child-friendly
         ctx.fillStyle = "black";
         ctx.fillRect(x - 20, y - 5, 4, 15);
         ctx.fillRect(x + 5, y - 5, 4, 15);
       }
-
-
     });
 
+    // title printed after background so it's always visible on top
     ctx.fillStyle = "black";
     ctx.font = "32px Comic Sans MS";
     ctx.fillText(story.title, 20, 50);
 
-    // Draw text
+    // story text printed near bottom so drawings appear visually “above the narration”
     ctx.fillStyle = "black";
     ctx.font = "24px Comic Sans MS";
     ctx.fillText(story.text, 20, canvas.height - 40);
   }, []);
 
   return (
+    // wrapper ensures canvas stays centered and responsive visually with padding around scene
     <div className="flex flex-col items-center p-6">
       <canvas
         ref={canvasRef}

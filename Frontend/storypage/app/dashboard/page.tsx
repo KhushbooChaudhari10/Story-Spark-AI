@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // Retrieves the user's Firebase ID token and fetches their associated children
     const fetchTokenAndChildren = async () => {
       const user = auth.currentUser;
       if (!user) return;
@@ -29,6 +30,7 @@ export default function DashboardPage() {
     fetchTokenAndChildren();
   }, []);
 
+  // Fetches the list of children from the backend using the user's ID token for authentication
   const fetchChildren = async (idToken: string) => {
     try {
       const res = await fetch("http://localhost:5000/api/users/children", {
@@ -46,7 +48,7 @@ export default function DashboardPage() {
     }
   };
 
-  // 👩‍👧 Handle new child added from form
+  // Handles adding a new child to the parent's profile through a POST request
   const handleAddChild = async (childData: { name: string; age: number }) => {
     if (!token) return alert("Unauthorized");
 
@@ -68,7 +70,8 @@ export default function DashboardPage() {
     }
   };
 
-  // 🗑️ Handle delete child
+  // Handles deleting a child entry after confirmation
+  // Updates the state locally to remove the deleted child
   const handleDeleteChild = async (id: string) => {
     if (!confirm("Are you sure you want to delete this child?")) return;
     try {
@@ -85,18 +88,23 @@ export default function DashboardPage() {
   };
 
   return (
+    // Main dashboard layout for parents
+    // Displays existing children and includes form for adding new ones
     <div className="min-h-screen bg-purple-100 flex flex-col items-center py-10">
       <h1 className="text-3xl font-bold text-purple-800 mb-6">Parent Dashboard</h1>
 
-      {/* ✅ Use Reusable Component */}
+      {/* Reusable component for adding new child entries */}
       <AddChildForm onAddChild={handleAddChild} />
 
       <div className="w-80">
         {loading ? (
+          // Loading state while fetching data
           <p>Loading...</p>
         ) : children.length === 0 ? (
+          // Message shown when no children are registered yet
           <p className="text-gray-600 text-center">No children added yet.</p>
         ) : (
+          // Render a list of children with action options
           <ul className="space-y-3">
             {children.map((child) => (
               <li
@@ -104,14 +112,17 @@ export default function DashboardPage() {
                 className="flex justify-between items-center bg-white p-3 rounded-lg shadow"
               >
                 <div>
+                  {/* Clickable name to navigate to child-specific dashboard */}
                   <p
                     className="font-semibold text-purple-700 cursor-pointer hover:underline"
-                    onClick={() => router.push(`/parent/child/${child._id}`)} // 👈 Updated
+                    onClick={() => router.push(`/parent/child/${child._id}`)}
                   >
                     {child.name}
                   </p>
                   <p className="text-sm text-gray-600">Age: {child.age}</p>
                 </div>
+
+                {/* Button for deleting a child record */}
                 <button
                   onClick={() => handleDeleteChild(child._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
