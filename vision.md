@@ -50,3 +50,4 @@ If Cinderella once inspired hope through fairy magic, this project uses *AI magi
 
 # Demo video
 https://youtu.be/37lPulTVnZw
+
