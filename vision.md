@@ -48,6 +48,6 @@ Instead of passively reading, children can:
 **Story Spark AI** blends art, storytelling, and imagination.  
 If Cinderella once inspired hope through fairy magic, this project uses *AI magic* to inspire creativity — allowing every child to become the **author, artist, and composer** of their own fairy tale.
 
-# Demo video
+# Vision 
 https://youtu.be/37lPulTVnZw
 
