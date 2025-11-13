@@ -9,6 +9,64 @@ collection = db["knowledge_base"]
 
 base_url = "https://kids.kiddle.co/"
 
+# -----------------------------
+# CATEGORY MAP
+# -----------------------------
+CATEGORY_MAP = {
+    # Animals
+    "tiger": "animal", "lion": "animal", "elephant": "animal", "giraffe": "animal",
+    "zebra": "animal", "monkey": "animal", "panda": "animal", "fox": "animal",
+    "wolf": "animal", "cow": "animal", "horse": "animal", "rabbit": "animal",
+    "dog": "animal", "cat": "animal", "dolphin": "animal", "whale": "animal",
+    "shark": "animal", "penguin": "animal", "bear": "animal", "kangaroo": "animal",
+
+    # Birds
+    "eagle": "animal", "parrot": "animal", "peacock": "animal",
+    "owl": "animal", "sparrow": "animal", "flamingo": "animal",
+
+    # Space
+    "mars": "place", "moon": "place", "rocket": "object",
+    "astronaut": "character", "galaxy": "place",
+    "black_hole": "place", "milky_way": "place",
+
+    # Nature
+    "mountain": "place", "waterfall": "place", "rainbow": "place",
+    "volcano": "place", "desert": "place", "forest": "place",
+    "ocean": "place", "river": "place", "island": "place",
+
+    # Objects
+    "car": "object", "robot": "character", "airplane": "object",
+    "train": "object", "ship": "object", "bicycle": "object",
+    "computer": "object", "mobile_phone": "object", "camera": "object",
+
+    # Food
+    "pizza": "food", "cake": "food", "chocolate": "food",
+    "ice_cream": "food", "burger": "food",
+
+    # Professions
+    "doctor": "profession", "pilot": "profession",
+    "engineer": "profession", "teacher": "profession",
+    "police": "profession", "firefighter": "profession",
+
+    # Fantasy
+    "princess": "character", "superhero": "character",
+    "ghost": "character", "dragon": "character",
+    "unicorn": "character", "mermaid": "character",
+    "fairy": "character", "wizard": "character", "ninja": "character",
+
+    # Dinosaurs
+    "dinosaur": "animal", "tyrannosaurus": "animal",
+    "triceratops": "animal", "velociraptor": "animal",
+
+    # Emotions
+    "happiness": "emotion", "friendship": "emotion",
+    "courage": "emotion", "kindness": "emotion",
+    "adventure": "emotion"
+}
+
+# -----------------------------
+# TOPIC SLUGS
+# -----------------------------
 topic_slugs = [
     # Animals
     "Tiger", "Lion", "Elephant", "Giraffe", "Zebra", "Monkey", "Panda", "Fox", "Wolf", "Cow",
@@ -20,11 +78,13 @@ topic_slugs = [
     # Space
     "Mars", "Moon", "Rocket", "Astronaut", "Galaxy", "Black_hole", "Milky_Way",
 
-    # Nature / Environment
-    "Mountain", "Waterfall", "Rainbow", "Volcano", "Desert", "Forest", "Ocean", "River", "Island",
+    # Nature
+    "Mountain", "Waterfall", "Rainbow", "Volcano", "Desert", "Forest",
+    "Ocean", "River", "Island",
 
-    # Objects / Inventions
-    "Car", "Robot", "Airplane", "Train", "Ship", "Bicycle", "Computer", "Mobile_phone", "Camera",
+    # Objects
+    "Car", "Robot", "Airplane", "Train", "Ship", "Bicycle",
+    "Computer", "Mobile_phone", "Camera",
 
     # Food
     "Pizza", "Cake", "Chocolate", "Ice_cream", "Burger",
@@ -32,17 +92,20 @@ topic_slugs = [
     # Professions
     "Doctor", "Pilot", "Engineer", "Teacher", "Police", "Firefighter",
 
-    # Characters / Fantasy
-    "Princess", "Superhero", "Ghost", "Dragon", "Unicorn", "Mermaid", "Fairy", "Wizard", "Ninja",
+    # Characters
+    "Princess", "Superhero", "Ghost", "Dragon", "Unicorn",
+    "Mermaid", "Fairy", "Wizard", "Ninja",
 
     # Dinosaurs
     "Dinosaur", "Tyrannosaurus", "Triceratops", "Velociraptor",
 
-    # Emotions / Concepts
+    # Emotions
     "Happiness", "Friendship", "Courage", "Kindness", "Adventure"
 ]
 
-
+# -----------------------------
+# SCRAPER FUNCTION
+# -----------------------------
 def scrape_slug(slug):
     url = base_url + slug
     resp = requests.get(url, timeout=15)
@@ -56,6 +119,7 @@ def scrape_slug(slug):
     title = title_tag.get_text().strip() if title_tag else slug
 
     paragraphs = [p.get_text().strip() for p in soup.find_all("p") if p.get_text().strip()]
+
     images = []
     for img in soup.find_all("img"):
         src = img.get("src")
@@ -73,6 +137,7 @@ def scrape_slug(slug):
     doc = {
         "slug": slug.lower(),
         "title": title,
+        "category": CATEGORY_MAP.get(slug.lower(), "unknown"),
         "description": " ".join(paragraphs),
         "images": images,
         "facts": facts,
@@ -82,6 +147,9 @@ def scrape_slug(slug):
 
     return doc
 
+# -----------------------------
+# SCRAPE LOOP
+# -----------------------------
 for slug in topic_slugs:
     print("Scraping:", slug)
     doc = scrape_slug(slug)
@@ -91,6 +159,6 @@ for slug in topic_slugs:
             {"$set": doc},
             upsert=True
         )
-    time.sleep(2)  # be polite
+    time.sleep(2)
 
 print("Scraping done.")
