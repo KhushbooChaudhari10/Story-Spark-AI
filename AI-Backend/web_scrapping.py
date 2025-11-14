@@ -3,15 +3,23 @@ import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 
+# Using local MongoDB so our knowledge base stays modifiable,
+# fast to read, and easy to extend without code changes.
 client = MongoClient("mongodb://localhost:27017/")
 db = client["storyspark-ai"]
 collection = db["knowledge_base"]
 
+# Kiddle is a kid-friendly encyclopedia → ideal for simple, safe descriptions.
 base_url = "https://kids.kiddle.co/"
 
 # -----------------------------
 # CATEGORY MAP
 # -----------------------------
+# WHY we maintain a category map:
+# -------------------------------
+# - Ensures controlled vocabulary for story parsing (animal/object/place/etc.)
+# - Allows StorySpark to reliably detect characters/settings from speech
+# - Lets us update categories here instead of hardcoding logic in the parser
 CATEGORY_MAP = {
     # Animals
     "tiger": "animal", "lion": "animal", "elephant": "animal", "giraffe": "animal",
@@ -67,6 +75,11 @@ CATEGORY_MAP = {
 # -----------------------------
 # TOPIC SLUGS
 # -----------------------------
+# WHY we use slugs:
+# -----------------
+# - They match exact pages on kids.kiddle.co
+# - Consistent lowercase keys help MongoDB querying
+# - Easy to pass into the scraper without complex URL logic
 topic_slugs = [
     # Animals
     "Tiger", "Lion", "Elephant", "Giraffe", "Zebra", "Monkey", "Panda", "Fox", "Wolf", "Cow",
@@ -107,19 +120,37 @@ topic_slugs = [
 # SCRAPER FUNCTION
 # -----------------------------
 def scrape_slug(slug):
+    """
+    WHY this scraper:
+    -----------------
+    StorySpark needs simple definitions, facts, and images
+    to help describe detected items (animals/places/objects).
+    Kiddle's content is kid-friendly and clean, so ideal for this purpose.
+
+    This function:
+    - Fetches page
+    - Extracts description + facts + images
+    - Normalizes data into a MongoDB-friendly structure
+    """
+
     url = base_url + slug
     resp = requests.get(url, timeout=15)
+
+    # If page missing or blocked → skip instead of crashing pipeline.
     if resp.status_code != 200:
         print(f"Skipping {slug} — status {resp.status_code}")
         return None
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
+    # Kids encyclopedia pages usually have <h1> as title, but fallback kept.
     title_tag = soup.find("h1")
     title = title_tag.get_text().strip() if title_tag else slug
 
+    # Clean paragraph text → used for child-friendly explanations.
     paragraphs = [p.get_text().strip() for p in soup.find_all("p") if p.get_text().strip()]
 
+    # Image extraction logic handles relative and absolute URLs.
     images = []
     for img in soup.find_all("img"):
         src = img.get("src")
@@ -132,12 +163,13 @@ def scrape_slug(slug):
                 full = base_url.rstrip("/") + "/" + src
             images.append(full)
 
+    # Facts section helps add fun trivia for the knowledge base.
     facts = [li.get_text().strip() for li in soup.find_all("li") if li.get_text().strip()]
 
     doc = {
         "slug": slug.lower(),
         "title": title,
-        "category": CATEGORY_MAP.get(slug.lower(), "unknown"),
+        "category": CATEGORY_MAP.get(slug.lower(), "unknown"),  # fallback prevents errors
         "description": " ".join(paragraphs),
         "images": images,
         "facts": facts,
@@ -150,6 +182,12 @@ def scrape_slug(slug):
 # -----------------------------
 # SCRAPE LOOP
 # -----------------------------
+# WHY a simple loop:
+# ------------------
+# - Easier to debug and monitor during long scraping jobs
+# - `upsert=True` ensures the scraper can be safely re-run
+#   without creating duplicates.
+# - 2-second delay prevents hitting Kiddle too aggressively.
 for slug in topic_slugs:
     print("Scraping:", slug)
     doc = scrape_slug(slug)
