@@ -66,7 +66,7 @@ def detect_objects_from_drawing(image_path):
       "colors": ["dominant", "colors"]
     }
     """
-
+ 
     try:
         # Use Gemini 1.5 Flash (Fast & Multimodal)
         model = genai.GenerativeModel("gemini-2.5-pro")
