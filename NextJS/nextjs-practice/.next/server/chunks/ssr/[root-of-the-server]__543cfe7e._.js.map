@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["file:///D:/Story-Spark-AI/NextJS/nextjs-practice/app/contact/page.js"],"sourcesContent":["import React from 'react'\r\n\r\nconst contact = () => {\r\n  return (\r\n    <div>\r\n        I am contact\r\n      \r\n    </div>\r\n  )\r\n}\r\n\r\nexport default contact\r\n"],"names":[],"mappings":";;;;;AAAA;;;AAEA,MAAM,UAAU;IACd,qBACE,8OAAC;kBAAI;;;;;;AAKT;uCAEe","debugId":null}}]
+}
