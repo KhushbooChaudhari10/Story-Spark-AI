@@ -13,6 +13,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
 const drawingRoutes = require('./routes/drawingRoutes');
 
+
 const app = express();
 
 // enabling cross-origin access so the frontend (Next.js on localhost:3000) can communicate with this backend
@@ -40,6 +41,7 @@ app.use('/api/storybooks', storybookRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/drawings', drawingRoutes);
+
 
 // protecting this route ensures only authenticated Firebase parents can create a child profile
 // token verification middleware extracts parent UID to link children to correct parent
