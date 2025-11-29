@@ -1,6 +1,6 @@
 "use client";
 
-import DrawingPad from "@/components/Drawingpad";
+import Drawingpad from "@/components/Drawingpad";
 
 export default function DrawingPage() {
   // Function triggered when the user finishes their drawing
@@ -13,5 +13,5 @@ export default function DrawingPage() {
 
   // Renders the interactive drawing component
   // The component receives a callback to handle completion events
-  return <DrawingPad onComplete={handleComplete} />;
+  return <Drawingpad onComplete={handleComplete} />;
 }

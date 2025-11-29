@@ -17,11 +17,9 @@ export default function HomePage() {
       */}
       <Image
         src="/story-spark-hero.png" // Must match public folder structure
-        alt="Story Spark AI hero graphic background"
-        layout="fill"
-        objectFit="cover"
-        quality={100}
-        className="absolute z-0"
+        alt="hero image"
+        fill
+        style={{ objectFit: "cover" }}
         priority
       />
 

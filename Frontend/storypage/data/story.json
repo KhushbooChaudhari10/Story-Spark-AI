@@ -1,0 +1,18 @@
+{
+  "title": "The Brave Fox",
+  "text": "The brave fox went into the forest.",
+  "illustrations": [
+    {
+      "action": "paint_background",
+      "background": "forest",
+      "color": "lightgreen"
+    },
+    {
+      "action": "paint_character",
+      "character": "fox",
+      "x": 200,
+      "y": 200,
+      "color": "orange"
+    }
+  ]
+}
