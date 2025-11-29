@@ -8,4 +8,4 @@ AI_CORE/.env
 AI_CORE/venv/
 AI_CORE/AI_Storyteller/stories/
 Frontend/storypage/firebaseConfig.ts
-Frontend/storypage/.next
+Frontend/storypage/.next/
