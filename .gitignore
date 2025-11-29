@@ -1,0 +1,9 @@
+node_modules/
+Frontend/storypage/node_modules/
+Frontend/storypage/.next
+Backend/node_modules/
+Backend/.env
+AI_CORE/__pycache__/
+AI_CORE/.env
+AI_CORE/venv/
+AI_CORE/AI_Storyteller/stories/
