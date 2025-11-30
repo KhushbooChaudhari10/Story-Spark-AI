@@ -9,3 +9,5 @@ AI_CORE/venv/
 AI_CORE/AI_Storyteller/stories/
 Frontend/storypage/firebaseConfig.ts
 Frontend/storypage/.next/
+AI-Backend/app/__pycache__
+AI-Backend/__pycache__
