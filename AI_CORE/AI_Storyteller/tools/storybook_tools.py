@@ -1,5 +1,13 @@
 from pydantic import BaseModel
 from typing import List
+import os
+import sys
+
+# Add root of AI_Storyteller to Python path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+STORYTELLER_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
+sys.path.append(STORYTELLER_ROOT)
+
 from schemas.storybook_schema import StoryPage, Storybook
 from tools.story_tools import generate_story_text
 from tools.background_tools import generate_background_image
@@ -75,7 +83,8 @@ def create_story_pages(data: StoryRequest) -> Storybook:
                     "description": "Background scene matching story",
                     "style": "watercolor"
                 }],
-                narration_url=audio
+                narration_url=audio,
+                background_url=bg
             )
         )
 

@@ -1,8 +1,10 @@
 import json
 import os
 import re
+import requests
 import google.generativeai as genai
 from dotenv import load_dotenv
+from io import BytesIO
 
 # 1. Load Env
 load_dotenv()
@@ -35,22 +37,34 @@ def extract_clean_json(text):
 
 def detect_objects_from_drawing(image_path):
     """
-    Uses Gemini Vision (Standard SDK) to analyze a child's drawing.
+    Uses Gemini Vision to analyze a child's drawing.
+    Supports BOTH:
+      - Remote URLs (Cloudinary)
+      - Local file paths
     """
-    
-    # --- PATH SAFETY FIX ---
-    # If the path provided is relative, make it absolute based on THIS file's location
-    if not os.path.isabs(image_path):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(base_dir, image_path)
 
-    if not os.path.exists(image_path):
-        print(f"❌ Error: Image file not found at {image_path}")
-        return {"error": "image_not_found"}
+    # ---------- FIX START ----------
+    # If the input is a URL, download it
+    if image_path.startswith("http://") or image_path.startswith("https://"):
+        try:
+            resp = requests.get(image_path, timeout=10)
+            if resp.status_code != 200:
+                print("❌ Failed to download image from URL")
+                return {"error": "image_download_failed"}
 
-    # Read image bytes
-    with open(image_path, "rb") as f:
-        image_bytes = f.read()
+            image_bytes = resp.content
+
+        except Exception as e:
+            return {"error": f"url_download_error: {str(e)}"}
+
+    else:
+        # Local file
+        if not os.path.exists(image_path):
+            print(f"❌ Error: Image file not found at {image_path}")
+            return {"error": "image_not_found"}
+
+        with open(image_path, "rb") as f:
+            image_bytes = f.read()
 
     # Prompt
     prompt = """
@@ -69,7 +83,7 @@ def detect_objects_from_drawing(image_path):
  
     try:
         # Use Gemini 1.5 Flash (Fast & Multimodal)
-        model = genai.GenerativeModel("gemini-2.5-pro")
+        model = genai.GenerativeModel("gemini-2.5-flash")
 
         # Prepare the content correctly for V1 SDK
         # V1 accepts a list containing the prompt string and a dictionary for the image

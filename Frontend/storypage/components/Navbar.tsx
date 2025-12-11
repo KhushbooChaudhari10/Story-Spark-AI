@@ -1,15 +1,47 @@
-import React from "react";
+"use client";
+import Link from "next/link";
 
 const Navbar = () => {
   return (
-    // Simple top-level banner to keep brand identity visible across screens
-    <div className="bg-purple-700 w-full h-12">
+    <nav className="fixed top-0 left-0 w-full z-50 
+      shadow-xl backdrop-blur-md bg-gradient-to-r from-purple-500 to-pink-400 ">
       
-      {/* Title placed in center to create a consistent anchor point for users */}
-      <h1 className="text-2xl font-sans-serif text-center text-white m-1">
-        Magic Story Book
-      </h1>
-    </div>
+      <div className="mx-auto flex items-center justify-between px-6 py-3">
+        
+        {/* LOGO */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <span className="text-3xl group-hover:rotate-12 transition-transform duration-300 drop-shadow-lg">
+            📖✨
+          </span>
+          <span className="text-3xl font-extrabold text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.4)]">
+            Story <span className="text-yellow-200">Spark</span>
+          </span>
+        </Link>
+
+        {/* MENU */}
+        <div className="flex items-center gap-6 text-lg font-semibold">
+          <Link href="/about" className="text-white hover:text-yellow-200 transition">
+            About Us
+          </Link>
+          <Link href="/contact" className="text-white hover:text-yellow-200 transition">
+            Contact
+          </Link>
+
+          <Link href="/login" className="text-white hover:text-yellow-200 transition font-bold">
+            Login
+          </Link>
+
+          {/* SIGN UP Button */}
+          <Link
+            href="/signup"
+            className="bg-yellow-300 text-purple-700 px-4 py-1.5 rounded-lg font-extrabold shadow-md 
+            hover:bg-yellow-200 hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-white"
+          >
+            ✨ Sign Up
+          </Link>
+        </div>
+      </div>
+    </nav>
   );
 };
 

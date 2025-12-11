@@ -28,5 +28,17 @@ celery = Celery(
     # -----------------
     # - Celery automatically discovers all task modules here
     # - Keeps tasks organized in a clean, scalable folder structure
-    include=["tasks.story_task"]
+    include=["tasks.story_task",
+             "tasks.transcribe_audio_task",
+             "tasks.drawing_task",
+             "tasks.story_generation_task",
+             "tasks.background_task",
+             "tasks.audio_task",
+             "tasks.supabase_task",
+             "tasks.storybook_task"]
+)
+
+celery.conf.update(
+    task_acks_late=True,
+    task_reject_on_worker_lost=True
 )

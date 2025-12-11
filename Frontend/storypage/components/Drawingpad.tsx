@@ -18,7 +18,8 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
   const [shapeMode, setShapeMode] = useState("pen");
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [mounted, setMounted] = useState(false);
-
+  const [mediaRecorder, setMediaRecorder] = useState<any>(null);
+  const [chunks, setChunks] = useState<any[]>([]);
   // giving quick fixed selection makes UI faster for kids — avoids manual color picking every time
   const presetColors = [
     "#FF0000",
@@ -211,7 +212,8 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
       const formData = new FormData();
       formData.append("drawing", blob, `drawing_${Date.now()}.png`);
       formData.append("childId", childId);
-
+      localStorage.removeItem("storybook");
+      localStorage.removeItem("storyId");
       try {
         const res = await fetch("http://localhost:5000/api/upload", {
           method: "POST",
@@ -219,7 +221,10 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
         });
 
         const data = await res.json();
-        if (res.ok) {
+        if (res.ok && data?.drawing?.imageUrl) {
+          localStorage.setItem("drawingUrl", data.drawing.imageUrl);
+          localStorage.setItem("childId", childId);
+
           alert("🎉 Drawing uploaded successfully!");
           onComplete();
         } else {
@@ -232,6 +237,94 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
     });
   };
 
+//   const startRecording = async () => {
+//   const childId = localStorage.getItem("childId");
+//   if (!childId) return alert("No child selected!");
+
+//   try {
+//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+//     const recorder = new MediaRecorder(stream);
+//     setMediaRecorder(recorder);
+//     setChunks([]);
+
+//     recorder.ondataavailable = (e) => {
+//       setChunks((prev) => [...prev, e.data]);
+//     };
+
+//     recorder.onstop = () => uploadAudio(childId);
+
+//     recorder.start();
+//     alert("🎙 Recording started... Click again to stop.");
+//   } catch (err) {
+//     alert("⚠️ Mic permission denied!");
+//     console.error(err);
+//   }
+// };
+
+// const stopRecording = () => {
+//   if (mediaRecorder) {
+//     mediaRecorder.stop();
+//     alert("📤 Uploading audio...");
+//   }
+// };
+
+// const uploadAudio = async (childId: string) => {
+//   const blob = new Blob(chunks, { type: "audio/webm" });
+//   const formData = new FormData();
+//   formData.append("audio", blob, `voice_${Date.now()}.webm`);
+//   formData.append("childId", childId);
+
+//   const res = await fetch("http://localhost:5000/api/upload/audio", {
+//     method: "POST",
+//     body: formData
+//   });
+
+//   const data = await res.json();
+//   if (res.ok) alert("🎉 Voice uploaded!");
+//   else alert("❌ Upload failed: " + data.message);
+// };
+
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const childId = localStorage.getItem("childId");
+  if (!childId) return alert("No child selected");
+
+  const file = e.target.files?.[0];
+  if (!file) return alert("No image selected");
+
+  const formData = new FormData();
+  formData.append("drawing", file);
+  formData.append("childId", childId);
+
+  // 🧹 Clear old story
+  localStorage.removeItem("storybook");
+  localStorage.removeItem("storyId");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    if (res.ok && data?.drawing?.imageUrl) {
+      // 💾 Store image URL like saveDrawing() does
+      localStorage.setItem("drawingUrl", data.drawing.imageUrl);
+      localStorage.setItem("childId", childId);
+
+      alert("🎉 Drawing uploaded successfully!");
+
+      // 🚀 SAME FLOW as Save Drawing
+      onComplete();
+    } else {
+      alert("❌ Upload failed: " + data.message);
+    }
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("⚠️ Upload error. Please try again later.");
+  }
+};
+
+
   if (!mounted) return null;
   
   return (
@@ -239,114 +332,122 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
       className="flex flex-col items-center min-h-screen bg-cover bg-center p-6"
       style={{
         backgroundImage:
-          "url('/c0d5f41f-cf89-4a0f-9fc3-066b2de8b3a1.jpg')",
+          "url('drawingpad.png')",
       }}
     >
-      <h1 className="text-3xl font-bold text-purple-800 mb-4">
-        🎨 Drawing Pad
+      <h1 className="text-4xl font-extrabold text-white tracking-wider mb-4 drop-shadow-lg">
+        🧚‍♂️ Create Your Magic!
       </h1>
 
+
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mb-4 bg-purple-400 p-4 shadow-md rounded-lg w-full max-w-5xl">
-        {/* Preset Colors */}
-        <div className="flex gap-2">
-          {presetColors.map((color) => (
-            <button
-              key={color}
-              onClick={() => {
-                setSelectedColor(color);
-                if (colorPickerRef.current)
-                  colorPickerRef.current.value = color;
-                setErasing(false);
-              }}
-              className={`w-8 h-8 rounded-full border ${
-                selectedColor === color ? "outline-2 outline-black" : ""
-              }`}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
+  <div className="flex flex-wrap items-center justify-center gap-4 mb-4 
+      bg-gradient-to-r from-purple-600 to-pink-500 
+      p-4 shadow-xl rounded-2xl w-full max-w-6xl border border-white/30 backdrop-blur-lg">
 
-        {/* Custom Picker */}
-        <input
-          type="color"
-          ref={colorPickerRef}
-          defaultValue={selectedColor}
-          onChange={(e) => setSelectedColor(e.target.value)}
-          className="w-10 h-10 border rounded"
+    {/* 🎨 Preset Colors */}
+    <div className="flex gap-3">
+      {presetColors.map((color) => (
+        <button
+          key={color}
+          onClick={() => {
+            setSelectedColor(color);
+            if (colorPickerRef.current) colorPickerRef.current.value = color;
+            setErasing(false);
+          }}
+          className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-125
+            ${selectedColor === color ? "ring-4 ring-yellow-300" : ""}`}
+          style={{ backgroundColor: color }}
         />
+      ))}
+    </div>
 
-        {/* Brush Size */}
-        <div className="flex items-center">
-          <label className="font-medium mr-2 text-white">Brush:</label>
-          <input
-            type="range"
-            ref={brushSizeRef}
-            min="1"
-            max="20"
-            defaultValue="5"
-          />
-        </div>
+    {/* 🎨 Custom Picker */}
+    <input
+      type="color"
+      ref={colorPickerRef}
+      defaultValue={selectedColor}
+      onChange={(e) => setSelectedColor(e.target.value)}
+      className="w-10 h-10 border-2 border-white rounded-full shadow-md hover:scale-110 transition-all"
+    />
 
-        {/* Eraser */}
-        <button
-          onClick={() => setErasing(!erasing)}
-          className={`px-4 py-2 rounded-lg text-white ${
-            erasing ? "bg-red-700" : "bg-purple-700"
-          }`}
-        >
-          {erasing ? "Eraser ON" : "Eraser OFF"}
-        </button>
+    {/* ✏️ Brush Size */}
+    <div className="flex items-center text-white">
+      <label className="font-medium mr-2">Brush:</label>
+      <input type="range" ref={brushSizeRef} min="1" max="20" defaultValue="5" 
+        className="accent-yellow-300 cursor-pointer" />
+    </div>
 
-        {/* Clear */}
-        <button
-          onClick={clearCanvas}
-          className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-        >
-          Clear
-        </button>
+    {/* 🧼 Eraser */}
+    <button
+      onClick={() => setErasing(!erasing)}
+      className={`px-4 py-2 rounded-xl text-white font-semibold shadow-md transition-all 
+        ${erasing ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-purple-800 hover:bg-purple-700"}`}
+    >
+      {erasing ? "🧹 Erasing" : "✏️ Draw"}
+    </button>
 
-        {/* Save */}
-        <button
-          onClick={saveDrawing}
-          className="px-4 py-2 bg-purple-900 text-white rounded-lg hover:bg-purple-800"
-        >
-          💾 Save
-        </button>
-      </div>
+    {/* 🗑 Clear */}
+    <button
+      onClick={clearCanvas}
+      className="px-4 py-2 bg-white/90 text-purple-700 rounded-xl font-semibold hover:bg-white shadow-lg"
+    >
+      🗑 Clear
+    </button>
+
+    {/* 📤 Upload */}
+    <input type="file" accept="image/*" id="uploadImageInput" style={{ display: "none" }} onChange={handleImageUpload} />
+    <button
+      onClick={() => document.getElementById("uploadImageInput")?.click()}
+      className="px-4 py-2 bg-yellow-200 text-purple-900 rounded-xl font-bold shadow-md hover:bg-yellow-300"
+    >
+      📁 Upload Drawing
+    </button>
+  </div>
 
       {/* Shape Buttons */}
-      <div className="flex gap-2 mb-4">
-        {[
-          { shape: "pen", label: "✏️" },
-          { shape: "circle", label: "⚪" },
-          { shape: "rectangle", label: "⬛" },
-          { shape: "line", label: "➖" },
-          { shape: "triangle", label: "🔺" },
-          { shape: "star", label: "⭐" },
-          { shape: "ellipse", label: "⬭" },
-        ].map((btn) => (
-          <button
-            key={btn.shape}
-            onClick={() => setShapeMode(btn.shape)}
-            className={`px-3 py-2 rounded ${
-              shapeMode === btn.shape
-                ? "bg-blue-500 text-white"
-                : "bg-blue-100 hover:bg-blue-400"
-            }`}
-          >
-            {btn.label}
-          </button>
-        ))}
-      </div>
+  <div className="flex gap-3 mb-4">
+    {[
+      { shape: "pen", label: "✏️" },
+      { shape: "circle", label: "⚪" },
+      { shape: "rectangle", label: "⬛" },
+      { shape: "line", label: "➖" },
+      { shape: "triangle", label: "🔺" },
+      { shape: "star", label: "⭐" },
+      { shape: "ellipse", label: "🟣" },
+    ].map((btn) => (
+      <button
+        key={btn.shape}
+        onClick={() => setShapeMode(btn.shape)}
+        className={`px-4 py-2 text-2xl rounded-xl shadow-md transition-transform 
+          ${shapeMode === btn.shape
+            ? "bg-yellow-400 text-purple-900 scale-110"
+            : "bg-white text-purple-800 hover:bg-yellow-200 hover:scale-105"}`}
+      >
+        {btn.label}
+      </button>
+    ))}
+  </div>
 
       {/* Canvas */}
       <canvas
         ref={canvasRef}
         width={1200}
         height={450}
-        className="border-2 border-purple-700 rounded-lg shadow-md bg-white/90 backdrop-blur-sm"
+        className="border-2 border-purple-700 rounded-lg shadow-md bg-white/90 backdrop-blur-3xl"
       />
+
+      {/* Save */}
+        <button
+          onClick={saveDrawing}
+          className="mt-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 
+                    text-white font-bold rounded-2xl shadow-lg 
+                    hover:scale-110 hover:shadow-purple-400 active:scale-95 
+                    transition-all flex items-center justify-center gap-2"
+        >
+          ✨ Make Magic!
+        </button>
+
     </div>
   );
 };

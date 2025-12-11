@@ -1,6 +1,7 @@
 # tts_tools.py
 import os
 import pyttsx3
+from utils.cloud_upload import upload_to_cloudinary  # 👈 add
 
 def narrate_story_text(text: str, story_id: str, page: int = None) -> str:
     """
@@ -33,4 +34,9 @@ def narrate_story_text(text: str, story_id: str, page: int = None) -> str:
     engine.runAndWait()
 
     print(f"✅ Offline Audio saved at: {file_path}")
-    return file_path
+
+    cloud_url = upload_to_cloudinary(file_path, folder=f"stories/{story_id}/audio")
+    print(f"🌥 Uploaded audio to Cloudinary: {cloud_url}")   
+    return cloud_url
+
+

@@ -1,7 +1,7 @@
 const cloudinary = require("cloudinary").v2;
 const Drawing = require("../models/Drawing");
 const User = require("../models/User");
-
+const Storybook = require("../models/Storybook"); 
 // configuring Cloudinary here avoids re-configuring on every upload.
 // this keeps upload operations lightweight in high-frequency kid drawing usage.
 cloudinary.config({
@@ -9,6 +9,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
 
 // kids produce drawings frequently — so uploads must be optimized + trust boundaries must be clear
 const uploadDrawing = async (req, res) => {
@@ -19,6 +20,11 @@ const uploadDrawing = async (req, res) => {
     // ensures data ownership integrity in multi-family system
     const child = await User.findOne({ _id: childId, role: "kid" });
     if (!child) return res.status(404).json({ message: "Child not found" });
+
+    await Storybook.updateMany(
+      { createdBy: child._id, status: "ready" },
+      { $set: { status: "archived" } }
+    );
 
     // streaming directly to Cloudinary avoids writing image to server disk
     // this removes need for temp file cleanup and scales better under multiple uploads
@@ -44,12 +50,26 @@ const uploadDrawing = async (req, res) => {
     await drawing.save();
 
     res.status(200).json({ message: "Upload successful", drawing });
-  } catch (err) {
-    // logging here is important because uploads are the highest failure-rate path (network, storage, child fast tapping UI, etc.)
-    console.error("Upload error:", err);
-    res.status(500).json({ message: "Server error: " + err.message });
-  }
-};
+  //   try {
+  //   const axios = require("axios");
+
+  //   const n8nWebhook = process.env.N8N_WEBHOOK_URL;
+
+  //   await axios.post(n8nWebhook, {
+  //     childId: child._id,
+  //     drawingUrl: uploadResult.secure_url
+  //   });
+  //   console.log("🎯 Sent drawing to n8n successfully.");
+  // } catch (err) {
+  //   console.error("❌ Failed to notify n8n:", err);
+
+  // }
+    } catch (err) {
+      // logging here is important because uploads are the highest failure-rate path (network, storage, child fast tapping UI, etc.)
+      console.error("Upload error:", err);
+      res.status(500).json({ message: "Server error: " + err.message });
+    }
+  };
 
 // this endpoint gives a parent a full view of all their kids’ creativity
 // useful for dashboards where parent monitors activity / progress
@@ -88,8 +108,41 @@ const getDrawingsByChildId = async (req, res) => {
   }
 };
 
+const uploadVoice = async (req, res) => {
+  try {
+    const { childId } = req.body;
+    if (!childId) return res.status(400).json({ message: "Child ID required" });
+
+    const child = await User.findOne({ _id: childId, role: "kid" });
+    if (!child) return res.status(404).json({ message: "Child not found" });
+
+    if (!req.file || !req.file.buffer)
+      return res.status(400).json({ message: "Empty audio file" });
+
+    const uploadResult = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        { folder: `storyspark_audio/${childId}`, resource_type: "audio" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      ).end(req.file.buffer);
+    });
+
+    res.status(200).json({
+      message: "Voice uploaded successfully",
+      audioUrl: uploadResult.secure_url
+    });
+
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "Server error: " + err.message });
+  }
+};
+
 module.exports = {
   uploadDrawing,
   getChildDrawings,
   getDrawingsByChildId,
+  uploadVoice,
 };

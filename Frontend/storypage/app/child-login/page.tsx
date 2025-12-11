@@ -2,26 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function ChildLoginPage() {
   const [childName, setChildName] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
-  // Handles child login form submission
-  // Validates input, sends login request, and redirects upon success
   const handleChildLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    // Input validation to ensure a name is entered
     if (!childName.trim()) {
       setError("Please enter your name");
       return;
     }
 
     try {
-      // Sends login request to backend API with child name
       const res = await fetch("http://localhost:5000/api/users/children/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,55 +28,69 @@ export default function ChildLoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Store child details locally for later access (e.g., personalization)
         localStorage.setItem("childName", data.child.name);
         localStorage.setItem("childId", data.child._id);
-
-        // Redirect to drawing page after successful login
         router.push("/drawing");
       } else {
-        // Handle login errors returned from backend
         setError(data.message || "Login failed. Try again.");
       }
     } catch (err) {
-      // Display fallback error message if network or server issue occurs
       setError("Server error. Please try again later.");
     }
   };
 
   return (
-    // Full-page layout centered for focus and easy interaction
-    <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-100">
-      {/* Page title indicating the section’s purpose */}
-      <h1 className="text-3xl font-bold text-yellow-700 mb-6">
-        🧒 Child Login
-      </h1>
+    <div className="relative w-full h-screen flex items-center justify-center">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 text-white text-2xl font-bold drop-shadow-lg">
+        📖✨ Story Spark
+      </div>
 
-      {/* Login form section handling user input and submission */}
-      <form
-        onSubmit={handleChildLogin}
-        className="bg-white p-6 rounded-lg shadow-lg flex flex-col gap-4 w-80"
-      >
-        {/* Input field for entering child's name */}
+
+      {/* Background Image */}
+      <Image
+        src="/child-login-background.png" // put your desired background here
+        alt="story cloud"
+        fill
+        style={{ objectFit: "cover" }}
+        className="opacity-90"
+        priority
+      />
+
+      {/* Dark Overlay for readability */}
+      <div className="absolute inset-0 bg-black/30 z-10"></div>
+
+      {/* Sparkles ⭐ */}
+      <div className="absolute inset-0 z-20 pointer-events-none">
+        <span className="absolute top-16 left-10 text-yellow-300 text-xl animate-pulse">✨</span>
+        <span className="absolute top-56 right-20 text-yellow-200 text-2xl animate-pulse">🌟</span>
+        <span className="absolute bottom-32 left-28 text-purple-200 text-xl animate-pulse">💫</span>
+      </div>
+
+      {/* Form Card */}
+      <div className="relative z-30 bg-purple-500 backdrop-blur-md border shadow-2xl rounded-2xl p-8 w-[340px] flex flex-col items-center gap-5">
+        
+        <h1 className="text-3xl font-extrabold text-purple-100 drop-shadow-md">
+          🧒 Your Name?
+        </h1>
+
         <input
           type="text"
-          placeholder="Enter your name"
+          placeholder="Type here..."
           value={childName}
           onChange={(e) => setChildName(e.target.value)}
-          className="border p-2 rounded focus:ring-2 focus:ring-yellow-500"
+          className="w-full border-2 border-purple-300 rounded-xl p-2 text-lg focus:ring-2 focus:ring-purple-400 outline-none bg-purple-50"
         />
 
-        {/* Button that starts the drawing session after login */}
         <button
           type="submit"
-          className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded font-semibold"
+          onClick={handleChildLogin}
+          className="w-full bg-gradient-to-r from-purple-600 to-pink-500 text-white py-2.5 rounded-xl text-lg font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition duration-300 active:scale-95"
         >
-          Start Drawing 🎨
+          ✨ Start Story Magic
         </button>
 
-        {/* Error message display for invalid input or failed login */}
-        {error && <p className="text-red-600 text-center">{error}</p>}
-      </form>
+        {error && <p className="text-red-600 text-center text-sm">{error}</p>}
+      </div>
     </div>
   );
 }

@@ -12,7 +12,7 @@ const storybookRoutes = require('./routes/storybookRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
 const drawingRoutes = require('./routes/drawingRoutes');
-
+const storyStatusRoutes = require("./routes/storyStatusRoutes");
 
 const app = express();
 
@@ -34,6 +34,8 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch((err) => console.error('MongoDB connection error:', err));
 
+app.use(express.json());
+
 // organizing endpoints as modular route files keeps main server clean and avoids "server.js becoming a giant file"
 app.use('/api/users', userRoutes);
 app.use('/api/characters', characterRoutes);
@@ -41,6 +43,8 @@ app.use('/api/storybooks', storybookRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/drawings', drawingRoutes);
+app.use("/api/story", storyStatusRoutes);
+
 
 
 // protecting this route ensures only authenticated Firebase parents can create a child profile

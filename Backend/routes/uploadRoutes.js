@@ -1,6 +1,8 @@
 const express = require("express");
 const multer = require("multer");
-const { uploadDrawing, getChildDrawings, getDrawingsByChildId } = require("../controllers/uploadController");
+const audioUpload = require("../middleware/multerAudio");
+
+const { uploadDrawing, getChildDrawings, getDrawingsByChildId, uploadVoice } = require("../controllers/uploadController");
 //const { verifyToken } = require("../middleware/authMiddleware"); 
 
 const router = express.Router();
@@ -12,6 +14,9 @@ const upload = multer({ storage });
 
 // children drawings are uploaded frequently, so handling this endpoint lightweight + fast is important
 router.post("/", upload.single("drawing"), uploadDrawing);
+// router.post("/audio", upload.single("audio"), uploadVoice);
+router.post("/upload/audio", audioUpload.single("audio"), uploadVoice);
+// router.post("/audio/story", audioUpload.single("audio"), uploadVoiceAndGenerateStory);
 
 // this endpoint gives parents visibility over all children they manage
 // parent UI needs aggregated view to monitor each child's progress/creativity

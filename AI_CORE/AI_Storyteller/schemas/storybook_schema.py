@@ -10,6 +10,7 @@ class StoryPage(BaseModel):
     text: str
     illustrations: List[Illustration]
     narration_url: Optional[str]
+    background_url: Optional[str]
 
 class Storybook(BaseModel):
     pages: List[StoryPage]

@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+from cloudinary.uploader import upload
 
 # Add root path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
