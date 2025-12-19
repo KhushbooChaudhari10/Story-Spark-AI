@@ -18,8 +18,12 @@ const Navbar = () => {
           </span>
         </Link>
 
+        
         {/* MENU */}
         <div className="flex items-center gap-6 text-lg font-semibold">
+          <Link href="/" className="text-white hover:text-yellow-200 transition">
+            Home
+          </Link>
           <Link href="/about" className="text-white hover:text-yellow-200 transition">
             About Us
           </Link>
@@ -34,8 +38,7 @@ const Navbar = () => {
           {/* SIGN UP Button */}
           <Link
             href="/signup"
-            className="bg-yellow-300 text-purple-700 px-4 py-1.5 rounded-lg font-extrabold shadow-md 
-            hover:bg-yellow-200 hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-white"
+            className="text-white hover:text-yellow-200 transition font-bold"
           >
             ✨ Sign Up
           </Link>

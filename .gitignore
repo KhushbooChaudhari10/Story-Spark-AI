@@ -12,3 +12,4 @@ Frontend/storypage/.next/
 AI-Backend/app/__pycache__
 AI-Backend/__pycache__
 .env
+Frontend/storypage/.env.local

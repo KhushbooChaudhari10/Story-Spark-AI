@@ -1,6 +1,9 @@
 {
   "dependencies": {
     "cloudinary": "^2.8.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "node-fetch": "^2.7.0",
+    "pdf-lib": "^1.17.1",
+    "react-pageflip": "^2.0.3"
   }
 }

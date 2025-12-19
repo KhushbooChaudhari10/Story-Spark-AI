@@ -23,23 +23,36 @@ def generate_story_task(prompt: dict) -> str:
             nature = ", ".join(drawing.get("nature", [])) or None
 
             drawing_prompt = (
-                "You are a children's storyteller. "
-                "Write a SHORT and meaningful story (4-5 paragraphs, max 3–4 lines each). "
-                "Make it warm, imaginative, and easy for a young child to understand.\n\n"
-                f"The story should be based on this child's drawing:\n"
-                f"- Animals: {animals or 'none'}\n"
-                f"- Objects: {objects or 'none'}\n"
-                f"- Nature/Environment: {nature or 'none'}\n"
-                f"- Colors used: {colors or 'unknown'}\n\n"
-                "Story Requirements:\n"
-                "- Use simple, happy, child-friendly language\n"
-                "- Make the main character lovable\n"
-                "- The story should be positive and comforting\n"
-                "- Add a tiny problem and a happy resolution\n"
-                "- Keep paragraphs short\n"
-                "- No violent themes\n"
-                "- Make the colors meaningful in the story\n"
-                "- End with a sweet or heartwarming line\n"
+               f"""You are a warm and imaginative children's storyteller.
+
+            First, create a short, meaningful TITLE for the story, inspired by the child’s drawing.
+            - The title should feel magical, cute, or adventurous.
+            - Keep it under 5 words.
+            - Make it poetic and easy for a child to say.
+            - Style it as if it will appear on the first page in a beautiful storybook font.
+
+            After the title, write a SHORT story (4 paragraphs, each 3 lines max).
+
+            The story should be based on this child's drawing:
+            - Animals in drawing: {animals or 'none'}
+            - Objects: {objects or 'none'}
+            - Nature / Environment: {nature or 'none'}
+            - Colors used: {colors or 'unknown'}
+
+            Story Requirements:
+            - Use simple, happy, child-friendly language.
+            - Make the main character lovable and curious.
+            - Introduce a tiny, gentle problem and a warm resolution.
+            - Make the colors meaningful within the story.
+            - Keep tone positive, imaginative, and comforting.
+            - No fear, danger, or violence.
+            - End with a sweet, heartwarming closing line.
+
+            Output Format:
+            1. Title on its own line (no quotes, no “Title:” label).
+            2. Then a blank line.
+            3. Then the story paragraphs."""
+
             )
 
             return generate_story(drawing_prompt)

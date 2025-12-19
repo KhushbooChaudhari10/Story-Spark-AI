@@ -13,6 +13,8 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
 const drawingRoutes = require('./routes/drawingRoutes');
 const storyStatusRoutes = require("./routes/storyStatusRoutes");
+const storybookDownloadRoutes = require("./routes/storybookdownloadRoutes");
+
 
 const app = express();
 
@@ -44,6 +46,9 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/drawings', drawingRoutes);
 app.use("/api/story", storyStatusRoutes);
+app.use("/api/storybook", storybookDownloadRoutes);
+
+
 
 
 

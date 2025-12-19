@@ -1,6 +1,8 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
+from groq import Groq
+
 
 # 1. Load environment variables
 load_dotenv()

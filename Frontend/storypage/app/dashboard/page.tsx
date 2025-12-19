@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { auth } from "@/firebaseConfig";
 import AddChildForm from "@/components/AddChildForm";
+import Image from "next/image";
+import Navbar from "@/components/Navbar";
 
 interface Child {
   _id: string;
@@ -18,25 +20,21 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Retrieves the user's Firebase ID token and fetches their associated children
     const fetchTokenAndChildren = async () => {
       const user = auth.currentUser;
       if (!user) return;
+
       const idToken = await user.getIdToken();
       setToken(idToken);
       await fetchChildren(idToken);
     };
-
     fetchTokenAndChildren();
   }, []);
 
-  // Fetches the list of children from the backend using the user's ID token for authentication
   const fetchChildren = async (idToken: string) => {
     try {
       const res = await fetch("http://localhost:5000/api/users/children", {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
+        headers: { Authorization: `Bearer ${idToken}` },
       });
       if (!res.ok) throw new Error("Failed to fetch children");
       const data = await res.json();
@@ -48,7 +46,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Handles adding a new child to the parent's profile through a POST request
   const handleAddChild = async (childData: { name: string; age: number }) => {
     if (!token) return alert("Unauthorized");
 
@@ -70,10 +67,8 @@ export default function DashboardPage() {
     }
   };
 
-  // Handles deleting a child entry after confirmation
-  // Updates the state locally to remove the deleted child
   const handleDeleteChild = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this child?")) return;
+    if (!confirm("Are you sure you want to remove this child?")) return;
     try {
       const res = await fetch(`http://localhost:5000/api/users/children/${id}`, {
         method: "DELETE",
@@ -88,44 +83,73 @@ export default function DashboardPage() {
   };
 
   return (
-    // Main dashboard layout for parents
-    // Displays existing children and includes form for adding new ones
-    <div className="min-h-screen bg-purple-100 flex flex-col items-center py-10">
-      <h1 className="text-3xl font-bold text-purple-800 mb-6">Parent Dashboard</h1>
+    <div className="relative min-h-screen bg-gradient-to-br from-purple-700 to-pink-500">
+      <Navbar />
 
-      {/* Reusable component for adding new child entries */}
-      <AddChildForm onAddChild={handleAddChild} />
+      {/* Background softly visible */}
+      <Image
+        src="/child-login-background.png"
+        alt="bg"
+        fill
+        className="object-cover opacity-25"
+      />
 
-      <div className="w-80">
+      {/* Sparkles */}
+      <span className="absolute top-28 left-20 text-yellow-200 text-2xl animate-pulse">✨</span>
+      <span className="absolute top-44 right-24 text-yellow-300 text-xl animate-bounce">⭐</span>
+
+      {/* Dashboard Container */}
+      <div className="relative z-20 max-w-3xl mx-auto mt-16 mb-20 px-6 py-10 rounded-3xl bg-white/15 backdrop-blur-2xl border border-white/30 shadow-2xl">
+
+        {/* Title */}
+        <h1 className="text-4xl font-extrabold text-white text-center drop-shadow-lg mb-8">
+          Parent Dashboard
+        </h1>
+
+        {/* Create Story Button */}
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={() => router.push("/child-login")}
+            className="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-10 py-3 rounded-xl text-lg font-bold shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
+          >
+            ✨ Create a New Story
+          </button>
+        </div>
+
+        {/* Add Child Form */}
+        <div className="flex justify-center mt-6">
+          <div className="w-full max-w-md">
+            <AddChildForm onAddChild={handleAddChild} />
+          </div>
+        </div>
+
+        {/* Children List */}
+        <h2 className="text-2xl text-center font-semibold text-white mt-5 mb-3">
+          Your Children
+        </h2>
+
         {loading ? (
-          // Loading state while fetching data
-          <p>Loading...</p>
+          <p className="text-white text-center">Loading…</p>
         ) : children.length === 0 ? (
-          // Message shown when no children are registered yet
-          <p className="text-gray-600 text-center">No children added yet.</p>
+          <p className="text-white/80 text-center italic">No children added yet.</p>
         ) : (
-          // Render a list of children with action options
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {children.map((child) => (
               <li
                 key={child._id}
-                className="flex justify-between items-center bg-white p-3 rounded-lg shadow"
+                className="flex justify-between items-center bg-white/60 backdrop-blur-md p-4 rounded-xl shadow-md border border-white/40"
               >
-                <div>
-                  {/* Clickable name to navigate to child-specific dashboard */}
-                  <p
-                    className="font-semibold text-purple-700 cursor-pointer hover:underline"
-                    onClick={() => router.push(`/parent/child/${child._id}`)}
-                  >
-                    {child.name}
-                  </p>
-                  <p className="text-sm text-gray-600">Age: {child.age}</p>
+                <div
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/parent/child/${child._id}`)}
+                >
+                  <p className="text-xl font-semibold text-purple-800">{child.name}</p>
+                  <p className="text-sm text-gray-700">Age: {child.age}</p>
                 </div>
 
-                {/* Button for deleting a child record */}
                 <button
                   onClick={() => handleDeleteChild(child._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  className="bg-red-500 text-white px-4 py-1.5 rounded-lg hover:bg-red-500-600 shadow-md"
                 >
                   Delete
                 </button>

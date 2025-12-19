@@ -12,40 +12,32 @@ export default function StoryLoading() {
 
       if (!childId) return alert("No child selected");
 
-      // 📌 If audio exists → PRIORITY = AUDIO
       let payload: any = { childId };
 
       if (audioPrompt) {
         payload.audioPrompt = audioPrompt;
-        console.log("🎤 Using audio prompt for story...");
       } else if (drawingUrl) {
         payload.drawingUrl = drawingUrl;
-        console.log("🖼 Using drawing for story...");
       } else {
         return alert("No drawing or audio prompt found!");
       }
 
-      // 🧹 Clear old story
       localStorage.removeItem("storybook");
       localStorage.removeItem("storyId");
 
       try {
-        await fetch("https://practice10.app.n8n.cloud/webhook/create-story", {
+        await fetch("http://localhost:5678/webhook/create-story", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
-
-        console.log("📨 Story Creation Trigger Sent!");
       } catch (err) {
-        console.error("Fetch failed:", err);
         alert("Server unreachable, check n8n status!");
       }
     }
 
     triggerStory();
 
-    // 🔁 Now we START polling DB every 3 seconds
     const interval = setInterval(async () => {
       const childId = localStorage.getItem("childId");
       if (!childId) return;
@@ -58,36 +50,67 @@ export default function StoryLoading() {
           data?.storyData?.pages?.length > 0 &&
           data.storyData.pages.every(
             (p: any) =>
-              p.background_url &&
-              p.background_url.startsWith("http") &&
-              !p.background_url.includes("Error") &&         
-              p.narration_url &&
-              p.narration_url.startsWith("http") &&
-              (p.narration_url.endsWith(".mp3") || p.narration_url.endsWith(".wav"))              
+              p.background_url?.startsWith("http") &&
+              p.narration_url?.startsWith("http")
           )
-        )
-  {
-          // ⬇️  🟢 SAVE ONLY storyData (not full mongo document)
-          localStorage.setItem("storybook", JSON.stringify({
-            title: data.title,
-            pages: data.storyData.pages
-          }));
+        ) {
+          localStorage.setItem(
+            "storybook",
+            JSON.stringify({
+              _id: data._id,
+              title: data.title,
+              pages: data.storyData.pages,
+            })
+          );
 
           localStorage.setItem("storyId", data._id);
-
           clearInterval(interval);
           window.location.href = "/view-story";
         }
-      } catch (err) {
+      } catch {
         console.log("Waiting for story...");
       }
     }, 3000);
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl">✨ Your Story is Being Created...</h1>
-      <p>Please wait...</p>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      
+      {/* 🌌 Background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/story_loading.png')" }}
+      />
+
+      {/* 🎭 Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/70 via-purple-800/60 to-pink-700/50 backdrop-blur-sm" />
+
+      {/* ✨ Floating sparkles */}
+      <span className="absolute top-20 left-16 text-yellow-300 text-2xl animate-pulse">✨</span>
+      <span className="absolute bottom-24 right-20 text-yellow-200 text-xl animate-bounce">⭐</span>
+      <span className="absolute top-1/3 right-1/3 text-yellow-100 text-lg animate-ping">🌟</span>
+
+      {/* 🧙 Main Content */}
+      <div className="relative z-10 text-center px-6">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white drop-shadow-lg mb-4">
+          ✨ Creating Your Story
+        </h1>
+
+        <p className="text-lg sm:text-xl text-purple-100 mb-10">
+          Our magic is working behind the scenes…
+        </p>
+
+        {/* 🔄 Loader */}
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-5 h-5 bg-pink-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+          <div className="w-5 h-5 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+          <div className="w-5 h-5 bg-yellow-300 rounded-full animate-bounce" />
+        </div>
+
+        <p className="mt-8 text-purple-200 text-sm italic">
+          This may take a minute. Please don’t close the page 🌈
+        </p>
+      </div>
     </div>
   );
 }
