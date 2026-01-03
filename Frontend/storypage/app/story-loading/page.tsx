@@ -8,11 +8,12 @@ export default function StoryLoading() {
     async function triggerStory() {
       const childId = localStorage.getItem("childId");
       const drawingUrl = localStorage.getItem("drawingUrl");
+      const scene_count = Number(localStorage.getItem("scene_count") || 5);
       const audioPrompt = localStorage.getItem("audioPrompt");
 
       if (!childId) return alert("No child selected");
 
-      let payload: any = { childId };
+      let payload: any = { childId, scene_count };
 
       if (audioPrompt) {
         payload.audioPrompt = audioPrompt;
@@ -40,6 +41,7 @@ export default function StoryLoading() {
 
     const interval = setInterval(async () => {
       const childId = localStorage.getItem("childId");
+      
       if (!childId) return;
 
       try {

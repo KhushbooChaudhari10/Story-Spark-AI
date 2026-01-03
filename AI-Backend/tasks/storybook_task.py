@@ -21,7 +21,7 @@ def generate_storybook_task(payload: dict):
     try:
         story_request = StoryRequest(
             prompt=payload["prompt"],
-            full_story=payload["full_story"],
+            story=payload["story"],
             story_id=payload["story_id"]
         )
 

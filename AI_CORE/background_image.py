@@ -20,7 +20,7 @@ def generate_background(prompt_text: str, story_id: str, page: int = None) -> st
     # --- Retry Pollinations if image invalid ---
     for attempt in range(3):
         try:
-            url = f"https://image.pollinations.ai/prompt/{prompt_text.replace(' ', '%20')}"
+            url = f"https://image.pollinations.ai/prompt/{prompt_text}"
             response = requests.get(url, timeout=25)
 
             # 🎯 Try to open using PIL (validate image)

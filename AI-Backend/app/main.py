@@ -96,12 +96,12 @@ def generate_audio(req: AudioRequest):
 # -------------------------
 
 class SupabaseStoryRequest(BaseModel):
-    story_text: str
+    story: dict
 
 
 @app.post("/save-story")
 def save_story_api(req: SupabaseStoryRequest):
-    task = store_story_task.delay(req.story_text)
+    task = store_story_task.delay(req.story)
     return {"task_id": task.id}
 
 
@@ -110,7 +110,7 @@ def save_story_api(req: SupabaseStoryRequest):
 # -------------------------
 class StorybookRequest(BaseModel):
     prompt: dict
-    full_story: str
+    story: dict
     story_id: str
 
 

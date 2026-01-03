@@ -30,7 +30,7 @@ export default function ChildLoginPage() {
       if (res.ok) {
         localStorage.setItem("childName", data.child.name);
         localStorage.setItem("childId", data.child._id);
-        router.push("/drawing");
+        router.push("/story-setup");
       } else {
         setError(data.message || "Login failed. Try again.");
       }

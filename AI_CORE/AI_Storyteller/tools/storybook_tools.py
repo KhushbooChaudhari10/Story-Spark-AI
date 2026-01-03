@@ -16,7 +16,7 @@ from tools.background_tools import generate_background_from_paragraph
 
 class StoryRequest(BaseModel):
     prompt: dict
-    full_story: str 
+    story: dict
     # pages: int = 5
     story_id: str
 
@@ -38,7 +38,7 @@ def create_story_pages(data: StoryRequest) -> Storybook:
 
     # 1) Generate full story
     # full_story = data.full_story
-    story_chunks = [p.strip() for p in data.full_story.split("\n\n") if p.strip()]
+    # story_chunks = [p.strip() for p in data.full_story.split("\n\n") if p.strip()]
 
     # # Pad if fewer paragraphs
     # while len(story_chunks) < total_pages:
@@ -70,22 +70,44 @@ def create_story_pages(data: StoryRequest) -> Storybook:
     #         )
     #     )
     # 2) Loop over paragraphs → dynamic pages
-    for i, text in enumerate(story_chunks, start=1):
+    # for i, text in enumerate(story_chunks, start=1):
 
-        bg = generate_background_from_paragraph(text, story_id, page=i)
-        audio = narrate_story_text(text, story_id, page=i)
+    #     bg = generate_background_from_paragraph(text, story_id, page=i)
+    #     audio = narrate_story_text(text, story_id, page=i)
+
+    #     pages.append(
+    #         StoryPage(
+    #             page=i,
+    #             text=text,
+    #             illustrations=[{
+    #                 "description": "Background scene matching story",
+    #                 "style": "watercolor"
+    #             }],
+    #             narration_url=audio,
+    #             background_url=bg
+    #         )
+    #     )
+    scenes = data.story["scenes"]
+
+    for scene in scenes:
+        page = scene["scene_id"]
+        text = scene["story_text"]
+
+        bg = generate_background_image(scene, data.story_id, page=page)
+        audio = narrate_story_text(text, data.story_id, page=page)
 
         pages.append(
             StoryPage(
-                page=i,
+                page=page,
                 text=text,
                 illustrations=[{
-                    "description": "Background scene matching story",
+                    "description": scene["setting"],
                     "style": "watercolor"
                 }],
                 narration_url=audio,
                 background_url=bg
             )
         )
+
 
     return Storybook(pages=pages)
