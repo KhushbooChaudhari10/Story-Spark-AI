@@ -19,7 +19,7 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [mounted, setMounted] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<any>(null);
-  const [chunks, setChunks] = useState<any[]>([]);
+const audioChunksRef = useRef<Blob[]>([]);
   // giving quick fixed selection makes UI faster for kids — avoids manual color picking every time
   const presetColors = [
     "#FF0000",
@@ -237,52 +237,62 @@ const Drawingpad: React.FC<DrawingPadProps> = ({ onComplete }) => {
     });
   };
 
-//   const startRecording = async () => {
-//   const childId = localStorage.getItem("childId");
-//   if (!childId) return alert("No child selected!");
+  const startRecording = async () => {
+  const childId = localStorage.getItem("childId");
+  if (!childId) return alert("No child selected!");
 
-//   try {
-//     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//     const recorder = new MediaRecorder(stream);
-//     setMediaRecorder(recorder);
-//     setChunks([]);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(stream);
+    setMediaRecorder(recorder);
+    audioChunksRef.current = [];
 
-//     recorder.ondataavailable = (e) => {
-//       setChunks((prev) => [...prev, e.data]);
-//     };
+    recorder.ondataavailable = (e) => {
+      audioChunksRef.current.push(e.data);
+    };
 
-//     recorder.onstop = () => uploadAudio(childId);
+    recorder.onstop = () => {
+      uploadAudio(childId);
+    };
 
-//     recorder.start();
-//     alert("🎙 Recording started... Click again to stop.");
-//   } catch (err) {
-//     alert("⚠️ Mic permission denied!");
-//     console.error(err);
-//   }
-// };
 
-// const stopRecording = () => {
-//   if (mediaRecorder) {
-//     mediaRecorder.stop();
-//     alert("📤 Uploading audio...");
-//   }
-// };
+    recorder.start();
+    // alert("🎙 Recording started... Click again to stop.");
+  } catch (err) {
+    alert("⚠️ Mic permission denied!");
+    console.error(err);
+  }
+};
 
-// const uploadAudio = async (childId: string) => {
-//   const blob = new Blob(chunks, { type: "audio/webm" });
-//   const formData = new FormData();
-//   formData.append("audio", blob, `voice_${Date.now()}.webm`);
-//   formData.append("childId", childId);
+const stopRecording = () => {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
 
-//   const res = await fetch("http://localhost:5000/api/upload/audio", {
-//     method: "POST",
-//     body: formData
-//   });
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    setMediaRecorder(null); // ✅ reset UI state
 
-//   const data = await res.json();
-//   if (res.ok) alert("🎉 Voice uploaded!");
-//   else alert("❌ Upload failed: " + data.message);
-// };
+    alert("📤 Uploading audio...");
+  }
+};
+
+
+const uploadAudio = async (childId: string) => {
+  const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+  const formData = new FormData();
+  formData.append("audio", blob, `voice_${Date.now()}.webm`);
+  formData.append("childId", childId);
+
+  const res = await fetch("http://localhost:5000/api/upload/audio", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+    if (res.ok && data?.audio?.audioUrl) {
+      localStorage.setItem("audioUrl", data.audio.audioUrl);
+      alert("🎧 Voice uploaded!");
+    }
+};
 
 const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const childId = localStorage.getItem("childId");
@@ -436,6 +446,16 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         height={450}
         className="border-2 border-purple-700 rounded-lg shadow-md bg-white/90 backdrop-blur-3xl"
       />
+
+      {/* Audio Controls */}
+      <div className="flex gap-3 mt-4">
+        <button
+          onClick={mediaRecorder ? stopRecording : startRecording}
+          className="px-4 py-2 bg-green-500 text-white rounded"
+        >
+          {mediaRecorder ? "⏹ Stop Recording" : "🎙 Record Voice"}
+        </button>
+      </div>
 
       {/* Save */}
         <button

@@ -9,18 +9,22 @@ export default function StoryLoading() {
       const childId = localStorage.getItem("childId");
       const drawingUrl = localStorage.getItem("drawingUrl");
       const scene_count = Number(localStorage.getItem("scene_count") || 5);
-      const audioPrompt = localStorage.getItem("audioPrompt");
+      const audioUrl = localStorage.getItem("audioUrl");
 
       if (!childId) return alert("No child selected");
 
       let payload: any = { childId, scene_count };
 
-      if (audioPrompt) {
-        payload.audioPrompt = audioPrompt;
-      } else if (drawingUrl) {
+      if (audioUrl) {
+        payload.audioUrl = audioUrl;
+      }
+
+      if (drawingUrl) {
         payload.drawingUrl = drawingUrl;
-      } else {
-        return alert("No drawing or audio prompt found!");
+      }
+
+      if (!audioUrl && !drawingUrl) {
+          return alert("No drawing or audio prompt found!");
       }
 
       localStorage.removeItem("storybook");

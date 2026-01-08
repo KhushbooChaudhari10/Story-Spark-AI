@@ -15,7 +15,7 @@ const upload = multer({ storage });
 // children drawings are uploaded frequently, so handling this endpoint lightweight + fast is important
 router.post("/", upload.single("drawing"), uploadDrawing);
 // router.post("/audio", upload.single("audio"), uploadVoice);
-router.post("/upload/audio", audioUpload.single("audio"), uploadVoice);
+router.post("/audio", audioUpload.single("audio"), uploadVoice);
 // router.post("/audio/story", audioUpload.single("audio"), uploadVoiceAndGenerateStory);
 
 // this endpoint gives parents visibility over all children they manage

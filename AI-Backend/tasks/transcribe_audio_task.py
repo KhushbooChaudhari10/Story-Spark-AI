@@ -1,26 +1,38 @@
-import sys, os
+import sys, os, requests, uuid, tempfile
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(PROJECT_ROOT)
 
 from app.celery_app import celery
-from AI_CORE.whisper_test import transcribe_audio  # 🔹 Your Whisper module
-from AI_CORE.AI_Storyteller.tools.prompt_tools import extract_prompt_from_transcription  # 🔹 Your prompt extractor
+from AI_CORE.whisper_test import transcribe_audio
+from AI_CORE.AI_Storyteller.tools.prompt_tools import extract_prompt_from_transcription
+
+
+def download_audio_from_url(audio_url: str) -> str:
+    temp_path = os.path.join(
+        tempfile.gettempdir(),
+        f"{uuid.uuid4()}.webm"
+    )
+
+    response = requests.get(audio_url, timeout=20)
+    response.raise_for_status()
+
+    with open(temp_path, "wb") as f:
+        f.write(response.content)
+
+    return temp_path
+
 
 @celery.task(name="tasks.transcribe_audio_task")
 def transcribe_audio_task(audio_url: str):
-    """
-    Background Celery task to:
-    1) Transcribe child's speech
-    2) Convert transcription → structured prompt dict
-    """
-    print(f"🎤 Transcribing audio from URL: {audio_url}")
+    print(f"🎤 Downloading audio from: {audio_url}")
 
     try:
-        text = transcribe_audio(audio_url)  # 🔹 Your whisper logic
+        local_audio_path = download_audio_from_url(audio_url)
+        text = transcribe_audio(local_audio_path)
     except Exception as e:
         return {"error": f"Transcription failed: {str(e)}"}
 
-    if not text or len(text.strip()) == 0:
+    if not text or not text.strip():
         return {"error": "No speech detected"}
 
     print("🧠 Extracting structured prompt from transcription...")

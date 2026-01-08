@@ -121,7 +121,10 @@ const uploadVoice = async (req, res) => {
 
     const uploadResult = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: `storyspark_audio/${childId}`, resource_type: "audio" },
+        {
+          folder: `storyspark_audio/${childId}`,
+          resource_type: "video" // ✅ correct for audio
+        },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
@@ -131,7 +134,10 @@ const uploadVoice = async (req, res) => {
 
     res.status(200).json({
       message: "Voice uploaded successfully",
-      audioUrl: uploadResult.secure_url
+      audio: {
+        audioUrl: uploadResult.secure_url,
+        publicId: uploadResult.public_id
+      }
     });
 
   } catch (err) {
@@ -139,6 +145,7 @@ const uploadVoice = async (req, res) => {
     res.status(500).json({ message: "Server error: " + err.message });
   }
 };
+
 
 module.exports = {
   uploadDrawing,
