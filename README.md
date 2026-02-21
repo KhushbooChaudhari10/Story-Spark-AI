@@ -1,43 +1,22 @@
-🌟 StorySpark AI
+# 🌟 StorySpark AI
 
-From a Child’s Drawing to a Magical Storybook — Powered by AI
+From a Child's Drawing to a Magical Storybook — Powered by AI
 
-StorySpark AI is a full-stack, multimodal AI application that transforms a child’s drawing and voice idea into a fully illustrated, narrated storybook.
+StorySpark AI is a full-stack, multimodal AI application that transforms a child's drawing and voice idea into a fully illustrated, narrated storybook.
 
-This project demonstrates real-world AI system design, combining:
+## 🚀 What StorySpark AI Does
 
-Vision AI
+🧒 **Child draws a picture or records a voice idea**  
+🤖 **AI understands the drawing / speech**  
+✍️ **AI generates a scene-based story**  
+🎨 **AI creates illustrations for each page**  
+🎙️ **AI narrates the story**  
+📖 **A flip-book style storybook is generated**  
+💾 **Story is stored for reuse & recommendations**
 
-Large Language Models
+## 🧠 System Architecture
 
-Text-to-Speech & Speech-to-Text
-
-Async task processing
-
-Workflow orchestration (n8n)
-
-Scalable backend architecture
-
-Child-friendly frontend UX
-
-
-🚀 What StorySpark AI Does
-
-🧒 Child draws a picture or records a voice idea
-
-🤖 AI understands the drawing / speech
-
-✍️ AI generates a scene-based story
-
-🎨 AI creates illustrations for each page
-
-🎙️ AI narrates the story
-
-📖 A flip-book style storybook is generated
-
-💾 Story is stored for reuse & recommendations
-
-🧠 System Architecture (High Level)
+```
 Frontend (Next.js)
         ↓
 Main Backend (Node.js + Express)
@@ -51,101 +30,192 @@ Celery Workers (Async)
 Vision | LLM | TTS | STT
         ↓
 Cloudinary | Supabase | MongoDB
+```
 
-⚙️ Core Technologies Used
-Frontend
+## 📁 Project Structure
 
-Next.js (App Router)
+```
+StorySpark-AI/
+│
+├── Frontend/storypage/     # Next.js frontend app
+├── Backend/                # Node.js + Express API
+├── AI-Backend/             # FastAPI AI gateway
+├── AI_CORE/               # Core AI processing modules
+├── N8n-data/              # Workflow configurations
+├── workflow/              # Additional workflow files
+├── venv/                  # Python virtual environment
+└── README.md
+```
 
-React + TypeScript
+## ⚙️ Core Technologies
 
-Tailwind CSS
+### Frontend
+- **Next.js 15.5.6** (App Router with Turbopack)
+- **React 19.1.0** + TypeScript
+- **Tailwind CSS 4.1.17**
+- **Firebase Authentication**
+- **HTML Canvas** (Drawing)
+- **react-pageflip** (storybook UI)
 
-HTML Canvas (Drawing)
+### Backend
+- **Node.js + Express 5.1.0**
+- **MongoDB + Mongoose 8.19.2**
+- **Firebase Admin SDK 13.5.0**
+- **Cloudinary** (images & audio)
+- **PDF-lib** (storybook export)
 
-react-pageflip (storybook UI)
+### AI & ML
+- **LLaMA 3.3 70B** (Groq) – story generation
+- **Gemini Vision** – drawing understanding
+- **Whisper** – speech-to-text
+- **Gemini TTS / pyttsx3** – narration
+- **Sentence Transformers (MiniLM)** – embeddings
 
-Backend
+### AI Backend & Orchestration
+- **FastAPI 0.121.0** – AI gateway
+- **Celery 5.5.3** – async AI execution
+- **Redis** – broker & result backend
+- **n8n** – workflow orchestration
 
-Node.js + Express
+### Storage
+- **MongoDB** – users, children, drawings, storybooks
+- **Cloudinary** – images & audio
+- **Supabase (pgvector)** – embeddings & AI memory
 
-MongoDB + Mongoose
+## � Installation & Setup
 
-Firebase Authentication
+### Prerequisites
+- Node.js (v18 or higher)
+- Python 3.8+
+- MongoDB
+- Redis
+- Firebase project
+- Cloudinary account
+- Groq API key
+- Google AI API key
 
-Cloudinary (images & audio)
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd Story-Spark-AI
+```
 
-PDF generation (storybook export)
+### 2. Frontend Setup
+```bash
+cd Frontend/storypage
+npm install
+```
 
-AI & ML
+Create `.env.local` file:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
 
-LLaMA 3.3 70B (Groq) – story generation
+### 3. Backend Setup
+```bash
+cd Backend
+npm install
+```
 
-Gemini Vision – drawing understanding
+Create `.env` file:
+```env
+MONGODB_URI=mongodb://localhost:27017/storyspark
+FIREBASE_SERVICE_ACCOUNT_KEY_PATH=./config/firebase.js
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+GROQ_API_KEY=your_groq_key
+GOOGLE_AI_API_KEY=your_google_ai_key
+```
 
-Whisper – speech-to-text
+### 4. AI Backend Setup
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-Gemini TTS / pyttsx3 – narration
+# Install Python dependencies
+pip install -r requirements.txt
+```
 
-Sentence Transformers (MiniLM) – embeddings
+### 5. Database Setup
+- Start MongoDB service
+- Start Redis service
+- Configure Firebase Authentication
+- Set up Cloudinary account
 
-AI Backend & Orchestration
+## 🏃‍♂️ Running the Application
 
-FastAPI – AI gateway
+### Development Mode
 
-Celery – async AI execution
+1. **Start Backend** (Terminal 1):
+```bash
+cd Backend
+npm run dev
+```
 
-Redis – broker & result backend
+2. **Start AI Backend** (Terminal 2):
+```bash
+cd AI-Backend
+uvicorn main:app --reload
+```
 
-n8n – workflow orchestration
+3. **Start Celery Worker** (Terminal 3):
+```bash
+cd AI-Backend
+celery -A celery_app.celery worker --loglevel=info
+```
 
-Storage
+4. **Start Frontend** (Terminal 4):
+```bash
+cd Frontend/storypage
+npm run dev
+```
 
-MongoDB – users, children, drawings, storybooks
+### Production Mode
 
-Cloudinary – images & audio
+1. **Build Frontend**:
+```bash
+cd Frontend/storypage
+npm run build
+npm start
+```
 
-Supabase (pgvector) – embeddings & AI memory
+2. **Start Backend**:
+```bash
+cd Backend
+npm start
+```
 
-🔁 n8n Workflow (AI Orchestration)
+3. **Start AI Backend**:
+```bash
+cd AI-Backend
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
 
-StorySpark AI uses n8n as the brain of the AI pipeline.
+## 🔧 Configuration
 
-What the Workflow Handles
+### Environment Variables
 
-Triggering AI tasks after uploads
+#### Backend (.env)
+- `MONGODB_URI`: MongoDB connection string
+- `FIREBASE_SERVICE_ACCOUNT_KEY_PATH`: Path to Firebase service account
+- `CLOUDINARY_*`: Cloudinary configuration
+- `GROQ_API_KEY`: Groq API key for LLM
+- `GOOGLE_AI_API_KEY`: Google AI API key for Vision/TTS
 
-Managing task IDs & polling
+#### Frontend (.env.local)
+- `NEXT_PUBLIC_FIREBASE_*`: Firebase configuration
+- `NEXT_PUBLIC_API_URL`: Backend API URL
 
-Sequencing:
+## 🔄 AI Processing Flow
 
-Drawing detection
-
-Story generation
-
-Image generation
-
-Audio narration
-
-Storybook creation
-
-Error handling & retries
-
-Keeping backend APIs lightweight
-
-Why n8n?
-
-Visual, debuggable AI pipelines
-
-Easy to extend & modify
-
-Production-friendly orchestration
-
-Decouples logic from code
-
-This allows StorySpark AI to scale without rewriting backend logic.
-
-🔄 AI Processing Flow (Detailed)
+```
 Child Input
   ├─ Drawing Upload → Vision AI → Object Extraction
   ├─ Voice Upload   → Whisper → Structured Prompt
@@ -161,105 +231,120 @@ Audio Narration (per page)
 Storybook Assembly
         ↓
 Vector Storage (Supabase)
+```
 
-⚡ Why Celery Is Used
+## 👨‍👩‍👧 User Roles
 
-AI tasks are slow and expensive.
-Celery ensures:
+### Parent
+- Firebase-authenticated login
+- Create & manage children
+- View children's stories
+- Download storybooks (PDF)
 
-Non-blocking APIs
+### Child
+- Name-only login (no passwords)
+- Draw or upload images
+- Record voice ideas
+- View narrated storybooks
 
-Parallel execution
+## 🧪 Key Engineering Highlights
 
-Worker-based scaling
+✅ **Multimodal AI** (vision + speech + text)  
+✅ **Async AI pipelines** with Celery  
+✅ **Workflow orchestration** using n8n  
+✅ **Production-style backend separation**  
+✅ **Vector DB** for future RAG & recommendations  
+✅ **Child-safe UX decisions**  
+✅ **Fault-tolerant AI execution**
 
-Safe retries
+## 🎯 Real-World Use Cases
 
-Fault isolation
+- Children's storytelling platforms
+- EdTech creativity tools
+- AI-assisted learning apps
+- Storybook publishing automation
+- Voice-driven creative AI systems
 
-Each AI step runs as an independent background task.
+## 🔮 Future Improvements
 
-👨‍👩‍👧 User Roles
-Parent
+- Multi-language stories
+- Personalized story recommendations
+- User story history & profiles
+- Streaming story generation
+- Mobile app version
+- Advanced parental controls
 
-Firebase-authenticated login
+## 🐛 Troubleshooting
 
-Create & manage children
+### Common Issues
 
-View children’s stories
+1. **MongoDB Connection Failed**
+   - Ensure MongoDB is running
+   - Check connection string in .env
 
-Download storybooks (PDF)
+2. **Redis Connection Error**
+   - Start Redis service
+   - Verify Redis configuration
 
-Child
+3. **Firebase Authentication Issues**
+   - Check Firebase configuration
+   - Verify API keys
 
-Name-only login (no passwords)
+4. **AI API Errors**
+   - Validate API keys
+   - Check rate limits
+   - Review API quotas
 
-Draw or upload images
+## 📚 API Documentation
 
-Record voice ideas
+### Backend Endpoints
 
-View narrated storybooks
+- `POST /api/auth/login` - User authentication
+- `POST /api/children` - Create child profile
+- `POST /api/drawings` - Upload drawing
+- `POST /api/stories` - Generate story
+- `GET /api/stories/:id` - Get story details
 
-📂 Project Structure (Simplified)
-StorySpark-AI/
-│
-├── frontend/           # Next.js app
-├── backend/            # Node.js + Express API
-├── ai-backend/
-│   ├── main.py         # FastAPI AI gateway
-│   ├── celery_app.py   # Celery configuration
-│   ├── tasks/          # AI background tasks
-│
-├── AI_CORE/
-│   ├── vision/
-│   ├── story/
-│   ├── tts/
-│   ├── tools/
-│
-├── workflows/          # n8n workflows
-└── README.md
+### AI Backend Endpoints
 
-🧪 Key Engineering Highlights
+- `POST /process-drawing` - Process drawing with Vision AI
+- `POST /generate-story` - Generate story with LLM
+- `POST /generate-audio` - Generate narration
+- `GET /task-status/:taskId` - Check task status
 
-✅ Multimodal AI (vision + speech + Text)
-✅ Async AI pipelines with Celery
-✅ Workflow orchestration using n8n
-✅ Production-style backend separation
-✅ Vector DB for future RAG & recommendations
-✅ Child-safe UX decisions
-✅ Fault-tolerant AI execution
+## Demo Videos
+1. Phase 0 - https://youtu.be/37lPulTVnZw
+2. Phase 1 - https://youtu.be/bo4dVHldECc
+3. Phase 2 - https://youtu.be/xbD6GuovYqU
+4. Phase 3 - https://youtu.be/f8Wa09TqjPk
+5. Phase 4 - https://youtu.be/MbUDZIsf6Ks
+6. Phase 5 - https://youtu.be/CKRYmRir92s
+7. Demo - https://youtu.be/sx-AThKMskE
 
-🎯 Real-World Use Cases
+## 🤝 Contributing
 
-Children’s storytelling platforms
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-EdTech creativity tools
+## 📄 License
 
-AI-assisted learning apps
+This project is licensed under the ISC License - see the package.json file for details.
 
-Storybook publishing automation
+## 👨‍💻 Author
 
-Voice-driven creative AI systems
-
-🔮 Future Improvements
-
-Multi-language stories
-
-Personalized story recommendations
-
-User story history & profiles
-
-Streaming story generation
-
-Mobile app version
-
-Advanced parental controls
-
-👨‍💻 Author
-
-Khush Chaudhari
+**Khushboo Chaudhari**  
 AI Engineer | Data Analyst | Full-Stack AI Developer
 
-GitHub: Add link
+- GitHub: [Add link]
+- LinkedIn: [Add link]
 
-LinkedIn: Add link
+## 🙏 Acknowledgments
+
+- Groq for fast LLM inference
+- Google AI for Vision and TTS capabilities
+- Firebase for authentication services
+- Cloudinary for media storage
+- n8n for workflow orchestration
